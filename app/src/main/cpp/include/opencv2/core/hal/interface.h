@@ -12,9 +12,7 @@
 //! @}
 
 #ifdef __cplusplus
-
 #include <cstddef>
-
 #else
 #include <stddef.h>
 #include <stdbool.h>
@@ -33,37 +31,35 @@
 //! @{
 #if !defined _MSC_VER && !defined __BORLANDC__
 #  if defined __cplusplus && __cplusplus >= 201103L && !defined __APPLE__
-
 #    include <cstdint>
-
 #    ifdef __NEWLIB__
-typedef unsigned int uint;
+        typedef unsigned int uint;
 #    else
-typedef std::uint32_t uint;
+        typedef std::uint32_t uint;
 #    endif
 #  else
 #    include <stdint.h>
-typedef uint32_t uint;
+     typedef uint32_t uint;
 #  endif
 #else
-typedef unsigned uint;
+   typedef unsigned uint;
 #endif
 
 typedef signed char schar;
 
 #ifndef __IPL_H__
-typedef unsigned char uchar;
-typedef unsigned short ushort;
+   typedef unsigned char uchar;
+   typedef unsigned short ushort;
 #endif
 
 #if defined _MSC_VER || defined __BORLANDC__
-typedef __int64 int64;
-typedef unsigned __int64 uint64;
+   typedef __int64 int64;
+   typedef unsigned __int64 uint64;
 #  define CV_BIG_INT(n)   n##I64
 #  define CV_BIG_UINT(n)  n##UI64
 #else
-typedef int64_t int64;
-typedef uint64_t uint64;
+   typedef int64_t int64;
+   typedef uint64_t uint64;
 #  define CV_BIG_INT(n)   n##LL
 #  define CV_BIG_UINT(n)  n##ULL
 #endif
@@ -86,7 +82,7 @@ typedef uint64_t uint64;
 #define CV_MAT_DEPTH_MASK       (CV_DEPTH_MAX - 1)
 #define CV_MAT_DEPTH(flags)     ((flags) & CV_MAT_DEPTH_MASK)
 
-#define CV_MAKETYPE(depth, cn) (CV_MAT_DEPTH(depth) + (((cn)-1) << CV_CN_SHIFT))
+#define CV_MAKETYPE(depth,cn) (CV_MAT_DEPTH(depth) + (((cn)-1) << CV_CN_SHIFT))
 #define CV_MAKE_TYPE CV_MAKETYPE
 
 #define CV_8UC1 CV_MAKETYPE(CV_8U,1)

@@ -13,8 +13,8 @@
 #include "logtag.hpp"
 
 namespace cv {
-    namespace utils {
-        namespace logging {
+namespace utils {
+namespace logging {
 
 //! @addtogroup core_logging
 //! @{
@@ -22,47 +22,38 @@ namespace cv {
 /** Set global logging level
 @return previous logging level
 */
-            CV_EXPORTS LogLevel
-            setLogLevel(LogLevel
-            logLevel);
+CV_EXPORTS LogLevel setLogLevel(LogLevel logLevel);
 /** Get global logging level */
-            CV_EXPORTS LogLevel
+CV_EXPORTS LogLevel getLogLevel();
 
-            getLogLevel();
+CV_EXPORTS void registerLogTag(cv::utils::logging::LogTag* plogtag);
 
-            CV_EXPORTS void registerLogTag(cv::utils::logging::LogTag *plogtag);
+CV_EXPORTS void setLogTagLevel(const char* tag, cv::utils::logging::LogLevel level);
 
-            CV_EXPORTS void setLogTagLevel(const char *tag, cv::utils::logging::LogLevel level);
+CV_EXPORTS cv::utils::logging::LogLevel getLogTagLevel(const char* tag);
 
-            CV_EXPORTS cv::utils::logging::LogLevel
-
-            getLogTagLevel(const char *tag);
-
-            namespace internal {
+namespace internal {
 
 /** Get global log tag */
-                CV_EXPORTS cv::utils::logging::LogTag
-                *
-
-                getGlobalLogTag();
+CV_EXPORTS cv::utils::logging::LogTag* getGlobalLogTag();
 
 /** Write log message */
-                CV_EXPORTS void writeLogMessage(LogLevel logLevel, const char *message);
+CV_EXPORTS void writeLogMessage(LogLevel logLevel, const char* message);
 
 /** Write log message */
-                CV_EXPORTS void
-                writeLogMessageEx(LogLevel logLevel, const char *tag, const char *file, int line,
-                                  const char *func, const char *message);
+CV_EXPORTS void writeLogMessageEx(LogLevel logLevel, const char* tag, const char* file, int line, const char* func, const char* message);
 
-            } // namespace
+} // namespace
 
-            struct LogTagAuto
-                    : public LogTag {
-                inline LogTagAuto(const char *_name, LogLevel _level)
-                        : LogTag(_name, _level) {
-                    registerLogTag(this);
-                }
-            };
+struct LogTagAuto
+    : public LogTag
+{
+    inline LogTagAuto(const char* _name, LogLevel _level)
+        : LogTag(_name, _level)
+    {
+        registerLogTag(this);
+    }
+};
 
 /**
  * \def CV_LOG_STRIP_LEVEL
@@ -157,8 +148,6 @@ namespace cv {
 
 //! @}
 
-        }
-    }
-} // namespace
+}}} // namespace
 
 #endif // OPENCV_LOGGER_HPP

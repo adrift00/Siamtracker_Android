@@ -7,29 +7,23 @@
 
 #include "../cvdef.h"
 
-namespace cv {
-    namespace utils {
+namespace cv { namespace utils {
 
-        class AllocatorStatisticsInterface {
-        protected:
-            AllocatorStatisticsInterface() {}
+class AllocatorStatisticsInterface
+{
+protected:
+    AllocatorStatisticsInterface() {}
+    virtual ~AllocatorStatisticsInterface() {}
+public:
+    virtual uint64_t getCurrentUsage() const = 0;
+    virtual uint64_t getTotalUsage() const = 0;
+    virtual uint64_t getNumberOfAllocations() const = 0;
+    virtual uint64_t getPeakUsage() const = 0;
 
-            virtual ~AllocatorStatisticsInterface() {}
+    /** set peak usage = current usage */
+    virtual void resetPeakUsage() = 0;
+};
 
-        public:
-            virtual uint64_t getCurrentUsage() const = 0;
-
-            virtual uint64_t getTotalUsage() const = 0;
-
-            virtual uint64_t getNumberOfAllocations() const = 0;
-
-            virtual uint64_t getPeakUsage() const = 0;
-
-            /** set peak usage = current usage */
-            virtual void resetPeakUsage() = 0;
-        };
-
-    }
-} // namespace
+}} // namespace
 
 #endif // OPENCV_CORE_ALLOCATOR_STATS_HPP

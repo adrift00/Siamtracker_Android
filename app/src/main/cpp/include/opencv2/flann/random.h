@@ -39,32 +39,35 @@
 
 #include "general.h"
 
-namespace cvflann {
+namespace cvflann
+{
 
-    inline int rand() {
+inline int rand()
+{
 #ifndef OPENCV_FLANN_USE_STD_RAND
 #   if INT_MAX == RAND_MAX
-        int v = cv::theRNG().next() & INT_MAX;
+    int v = cv::theRNG().next() & INT_MAX;
 #   else
-        int v = cv::theRNG().uniform(0, RAND_MAX + 1);
+    int v = cv::theRNG().uniform(0, RAND_MAX + 1);
 #   endif
 #else
-        int v = std::rand();
+    int v = std::rand();
 #endif // OPENCV_FLANN_USE_STD_RAND
-        return v;
-    }
+    return v;
+}
 
 /**
  * Seeds the random number generator
  *  @param seed Random seed
  */
-    inline void seed_random(unsigned int seed) {
+inline void seed_random(unsigned int seed)
+{
 #ifndef OPENCV_FLANN_USE_STD_RAND
-        cv::theRNG() = cv::RNG(seed);
+    cv::theRNG() = cv::RNG(seed);
 #else
-        std::srand(seed);
+    std::srand(seed);
 #endif
-    }
+}
 
 /*
  * Generates a random double value.
@@ -75,9 +78,10 @@ namespace cvflann {
  * @param low Lower limit
  * @return Random double value
  */
-    inline double rand_double(double high = 1.0, double low = 0) {
-        return low + ((high - low) * (rand() / (RAND_MAX + 1.0)));
-    }
+inline double rand_double(double high = 1.0, double low = 0)
+{
+    return low + ((high-low) * (rand() / (RAND_MAX + 1.0)));
+}
 
 /**
  * Generates a random integer value.
@@ -85,62 +89,68 @@ namespace cvflann {
  * @param low Lower limit
  * @return Random integer value
  */
-    inline int rand_int(int high = RAND_MAX, int low = 0) {
-        return low + (int) (double(high - low) * (rand() / (RAND_MAX + 1.0)));
-    }
+inline int rand_int(int high = RAND_MAX, int low = 0)
+{
+    return low + (int) ( double(high-low) * (rand() / (RAND_MAX + 1.0)));
+}
 
 /**
  * Random number generator that returns a distinct number from
  * the [0,n) interval each time.
  */
-    class UniqueRandom {
-        std::vector<int> vals_;
-        int size_;
-        int counter_;
+class UniqueRandom
+{
+    std::vector<int> vals_;
+    int size_;
+    int counter_;
 
-    public:
-        /**
-         * Constructor.
-         * @param n Size of the interval from which to generate
-         * @return
-         */
-        UniqueRandom(int n) {
-            init(n);
-        }
+public:
+    /**
+     * Constructor.
+     * @param n Size of the interval from which to generate
+     * @return
+     */
+    UniqueRandom(int n)
+    {
+        init(n);
+    }
 
-        /**
-         * Initializes the number generator.
-         * @param n the size of the interval from which to generate random numbers.
-         */
-        void init(int n) {
-            // create and initialize an array of size n
-            vals_.resize(n);
-            size_ = n;
-            for (int i = 0; i < size_; ++i) vals_[i] = i;
+    /**
+     * Initializes the number generator.
+     * @param n the size of the interval from which to generate random numbers.
+     */
+    void init(int n)
+    {
+        // create and initialize an array of size n
+        vals_.resize(n);
+        size_ = n;
+        for (int i = 0; i < size_; ++i) vals_[i] = i;
 
-            // shuffle the elements in the array
+        // shuffle the elements in the array
 #ifndef OPENCV_FLANN_USE_STD_RAND
-            cv::randShuffle(vals_);
+        cv::randShuffle(vals_);
 #else
-            std::random_shuffle(vals_.begin(), vals_.end());
+        std::random_shuffle(vals_.begin(), vals_.end());
 #endif
 
-            counter_ = 0;
-        }
+        counter_ = 0;
+    }
 
-        /**
-         * Return a distinct random integer in greater or equal to 0 and less
-         * than 'n' on each call. It should be called maximum 'n' times.
-         * Returns: a random integer
-         */
-        int next() {
-            if (counter_ == size_) {
-                return -1;
-            } else {
-                return vals_[counter_++];
-            }
+    /**
+     * Return a distinct random integer in greater or equal to 0 and less
+     * than 'n' on each call. It should be called maximum 'n' times.
+     * Returns: a random integer
+     */
+    int next()
+    {
+        if (counter_ == size_) {
+            return -1;
         }
-    };
+        else {
+            return vals_[counter_++];
+        }
+    }
+};
 
 }
 

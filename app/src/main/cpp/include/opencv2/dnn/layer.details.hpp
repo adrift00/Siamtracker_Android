@@ -8,8 +8,8 @@
 #include <opencv2/dnn/layer.hpp>
 
 namespace cv {
-    namespace dnn {
-        CV__DNN_INLINE_NS_BEGIN
+namespace dnn {
+CV__DNN_INLINE_NS_BEGIN
 
 /** @brief Registers layer constructor in runtime.
 *   @param type string, containing type name of the layer.
@@ -45,32 +45,34 @@ Ptr<Layer> __LayerStaticRegisterer_func_##type(LayerParams &params) \
     { return Ptr<Layer>(new class(params)); }                       \
 static cv::dnn::details::_LayerStaticRegisterer __LayerStaticRegisterer_##type(#type, __LayerStaticRegisterer_func_##type);
 
-        namespace details {
+namespace details {
 
-            template<typename LayerClass>
-            Ptr <Layer> _layerDynamicRegisterer(LayerParams &params) {
-                return Ptr<Layer>(LayerClass::create(params));
-            }
+template<typename LayerClass>
+Ptr<Layer> _layerDynamicRegisterer(LayerParams &params)
+{
+    return Ptr<Layer>(LayerClass::create(params));
+}
 
 //allows automatically register created layer on module load time
-            class _LayerStaticRegisterer {
-                String type;
-            public:
+class _LayerStaticRegisterer
+{
+    String type;
+public:
 
-                _LayerStaticRegisterer(const String &layerType,
-                                       LayerFactory::Constructor layerConstructor) {
-                    this->type = layerType;
-                    LayerFactory::registerLayer(layerType, layerConstructor);
-                }
-
-                ~_LayerStaticRegisterer() {
-                    LayerFactory::unregisterLayer(type);
-                }
-            };
-
-        } // namespace
-        CV__DNN_INLINE_NS_END
+    _LayerStaticRegisterer(const String &layerType, LayerFactory::Constructor layerConstructor)
+    {
+        this->type = layerType;
+        LayerFactory::registerLayer(layerType, layerConstructor);
     }
+
+    ~_LayerStaticRegisterer()
+    {
+        LayerFactory::unregisterLayer(type);
+    }
+};
+
 } // namespace
+CV__DNN_INLINE_NS_END
+}} // namespace
 
 #endif

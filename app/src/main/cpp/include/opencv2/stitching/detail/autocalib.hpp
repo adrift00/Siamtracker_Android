@@ -47,7 +47,7 @@
 #include "matchers.hpp"
 
 namespace cv {
-    namespace detail {
+namespace detail {
 
 //! @addtogroup stitching_autocalib
 //! @{
@@ -64,9 +64,7 @@ undergoes rotations around its centre only.
 See "Construction of Panoramic Image Mosaics with Global and Local Alignment"
 by Heung-Yeung Shum and Richard Szeliski.
  */
-        void CV_EXPORTS_W
-
-        focalsFromHomography(const Mat &H, double &f0, double &f1, bool &f0_ok, bool &f1_ok);
+void CV_EXPORTS_W focalsFromHomography(const Mat &H, double &f0, double &f1, bool &f0_ok, bool &f1_ok);
 
 /** @brief Estimates focal lengths for each given camera.
 
@@ -74,21 +72,15 @@ by Heung-Yeung Shum and Richard Szeliski.
 @param pairwise_matches Matches between all image pairs.
 @param focals Estimated focal lengths for each camera.
  */
-        void CV_EXPORTS
+void CV_EXPORTS estimateFocal(const std::vector<ImageFeatures> &features,
+                              const std::vector<MatchesInfo> &pairwise_matches,
+                              std::vector<double> &focals);
 
-        estimateFocal(const std::vector <ImageFeatures> &features,
-                      const std::vector <MatchesInfo> &pairwise_matches,
-                      std::vector<double> &focals);
-
-        bool CV_EXPORTS_W
-
-        calibrateRotatingCamera(const std::vector <Mat> &Hs, CV_OUT Mat &
-
-        K);
+bool CV_EXPORTS_W calibrateRotatingCamera(const std::vector<Mat> &Hs,CV_OUT Mat &K);
 
 //! @} stitching_autocalib
 
-    } // namespace detail
+} // namespace detail
 } // namespace cv
 
 #endif // OPENCV_STITCHING_AUTOCALIB_HPP

@@ -44,16 +44,11 @@
 #define OPENCV_HIGHGUI_HPP
 
 #include "opencv2/core.hpp"
-
 #ifdef HAVE_OPENCV_IMGCODECS
-
 #include "opencv2/imgcodecs.hpp"
-
 #endif
 #ifdef HAVE_OPENCV_VIDEOIO
-
 #include "opencv2/videoio.hpp"
-
 #endif
 
 /**
@@ -177,83 +172,84 @@ It provides easy interface to:
 */
 
 ///////////////////////// graphical user interface //////////////////////////
-namespace cv {
+namespace cv
+{
 
 //! @addtogroup highgui
 //! @{
 
 //! Flags for cv::namedWindow
-    enum WindowFlags {
-        WINDOW_NORMAL = 0x00000000, //!< the user can resize the window (no constraint) / also use to switch a fullscreen window to a normal size.
-        WINDOW_AUTOSIZE = 0x00000001, //!< the user cannot resize the window, the size is constrainted by the image displayed.
-        WINDOW_OPENGL = 0x00001000, //!< window with opengl support.
+enum WindowFlags {
+       WINDOW_NORMAL     = 0x00000000, //!< the user can resize the window (no constraint) / also use to switch a fullscreen window to a normal size.
+       WINDOW_AUTOSIZE   = 0x00000001, //!< the user cannot resize the window, the size is constrainted by the image displayed.
+       WINDOW_OPENGL     = 0x00001000, //!< window with opengl support.
 
-        WINDOW_FULLSCREEN = 1,          //!< change the window to fullscreen.
-        WINDOW_FREERATIO = 0x00000100, //!< the image expends as much as it can (no ratio constraint).
-        WINDOW_KEEPRATIO = 0x00000000, //!< the ratio of the image is respected.
-        WINDOW_GUI_EXPANDED = 0x00000000, //!< status bar and tool bar
-        WINDOW_GUI_NORMAL = 0x00000010, //!< old fashious way
+       WINDOW_FULLSCREEN = 1,          //!< change the window to fullscreen.
+       WINDOW_FREERATIO  = 0x00000100, //!< the image expends as much as it can (no ratio constraint).
+       WINDOW_KEEPRATIO  = 0x00000000, //!< the ratio of the image is respected.
+       WINDOW_GUI_EXPANDED=0x00000000, //!< status bar and tool bar
+       WINDOW_GUI_NORMAL = 0x00000010, //!< old fashious way
     };
 
 //! Flags for cv::setWindowProperty / cv::getWindowProperty
-    enum WindowPropertyFlags {
-        WND_PROP_FULLSCREEN = 0, //!< fullscreen property    (can be WINDOW_NORMAL or WINDOW_FULLSCREEN).
-        WND_PROP_AUTOSIZE = 1, //!< autosize property      (can be WINDOW_NORMAL or WINDOW_AUTOSIZE).
-        WND_PROP_ASPECT_RATIO = 2, //!< window's aspect ration (can be set to WINDOW_FREERATIO or WINDOW_KEEPRATIO).
-        WND_PROP_OPENGL = 3, //!< opengl support.
-        WND_PROP_VISIBLE = 4, //!< checks whether the window exists and is visible
-        WND_PROP_TOPMOST = 5  //!< property to toggle normal window being topmost or not
-    };
+enum WindowPropertyFlags {
+       WND_PROP_FULLSCREEN   = 0, //!< fullscreen property    (can be WINDOW_NORMAL or WINDOW_FULLSCREEN).
+       WND_PROP_AUTOSIZE     = 1, //!< autosize property      (can be WINDOW_NORMAL or WINDOW_AUTOSIZE).
+       WND_PROP_ASPECT_RATIO = 2, //!< window's aspect ration (can be set to WINDOW_FREERATIO or WINDOW_KEEPRATIO).
+       WND_PROP_OPENGL       = 3, //!< opengl support.
+       WND_PROP_VISIBLE      = 4, //!< checks whether the window exists and is visible
+       WND_PROP_TOPMOST      = 5  //!< property to toggle normal window being topmost or not
+     };
 
 //! Mouse Events see cv::MouseCallback
-    enum MouseEventTypes {
-        EVENT_MOUSEMOVE = 0, //!< indicates that the mouse pointer has moved over the window.
-        EVENT_LBUTTONDOWN = 1, //!< indicates that the left mouse button is pressed.
-        EVENT_RBUTTONDOWN = 2, //!< indicates that the right mouse button is pressed.
-        EVENT_MBUTTONDOWN = 3, //!< indicates that the middle mouse button is pressed.
-        EVENT_LBUTTONUP = 4, //!< indicates that left mouse button is released.
-        EVENT_RBUTTONUP = 5, //!< indicates that right mouse button is released.
-        EVENT_MBUTTONUP = 6, //!< indicates that middle mouse button is released.
-        EVENT_LBUTTONDBLCLK = 7, //!< indicates that left mouse button is double clicked.
-        EVENT_RBUTTONDBLCLK = 8, //!< indicates that right mouse button is double clicked.
-        EVENT_MBUTTONDBLCLK = 9, //!< indicates that middle mouse button is double clicked.
-        EVENT_MOUSEWHEEL = 10,//!< positive and negative values mean forward and backward scrolling, respectively.
-        EVENT_MOUSEHWHEEL = 11 //!< positive and negative values mean right and left scrolling, respectively.
-    };
+enum MouseEventTypes {
+       EVENT_MOUSEMOVE      = 0, //!< indicates that the mouse pointer has moved over the window.
+       EVENT_LBUTTONDOWN    = 1, //!< indicates that the left mouse button is pressed.
+       EVENT_RBUTTONDOWN    = 2, //!< indicates that the right mouse button is pressed.
+       EVENT_MBUTTONDOWN    = 3, //!< indicates that the middle mouse button is pressed.
+       EVENT_LBUTTONUP      = 4, //!< indicates that left mouse button is released.
+       EVENT_RBUTTONUP      = 5, //!< indicates that right mouse button is released.
+       EVENT_MBUTTONUP      = 6, //!< indicates that middle mouse button is released.
+       EVENT_LBUTTONDBLCLK  = 7, //!< indicates that left mouse button is double clicked.
+       EVENT_RBUTTONDBLCLK  = 8, //!< indicates that right mouse button is double clicked.
+       EVENT_MBUTTONDBLCLK  = 9, //!< indicates that middle mouse button is double clicked.
+       EVENT_MOUSEWHEEL     = 10,//!< positive and negative values mean forward and backward scrolling, respectively.
+       EVENT_MOUSEHWHEEL    = 11 //!< positive and negative values mean right and left scrolling, respectively.
+     };
 
 //! Mouse Event Flags see cv::MouseCallback
-    enum MouseEventFlags {
-        EVENT_FLAG_LBUTTON = 1, //!< indicates that the left mouse button is down.
-        EVENT_FLAG_RBUTTON = 2, //!< indicates that the right mouse button is down.
-        EVENT_FLAG_MBUTTON = 4, //!< indicates that the middle mouse button is down.
-        EVENT_FLAG_CTRLKEY = 8, //!< indicates that CTRL Key is pressed.
-        EVENT_FLAG_SHIFTKEY = 16,//!< indicates that SHIFT Key is pressed.
-        EVENT_FLAG_ALTKEY = 32 //!< indicates that ALT Key is pressed.
-    };
+enum MouseEventFlags {
+       EVENT_FLAG_LBUTTON   = 1, //!< indicates that the left mouse button is down.
+       EVENT_FLAG_RBUTTON   = 2, //!< indicates that the right mouse button is down.
+       EVENT_FLAG_MBUTTON   = 4, //!< indicates that the middle mouse button is down.
+       EVENT_FLAG_CTRLKEY   = 8, //!< indicates that CTRL Key is pressed.
+       EVENT_FLAG_SHIFTKEY  = 16,//!< indicates that SHIFT Key is pressed.
+       EVENT_FLAG_ALTKEY    = 32 //!< indicates that ALT Key is pressed.
+     };
 
 //! Qt font weight
-    enum QtFontWeights {
-        QT_FONT_LIGHT = 25, //!< Weight of 25
-        QT_FONT_NORMAL = 50, //!< Weight of 50
-        QT_FONT_DEMIBOLD = 63, //!< Weight of 63
-        QT_FONT_BOLD = 75, //!< Weight of 75
-        QT_FONT_BLACK = 87  //!< Weight of 87
-    };
+enum QtFontWeights {
+        QT_FONT_LIGHT           = 25, //!< Weight of 25
+        QT_FONT_NORMAL          = 50, //!< Weight of 50
+        QT_FONT_DEMIBOLD        = 63, //!< Weight of 63
+        QT_FONT_BOLD            = 75, //!< Weight of 75
+        QT_FONT_BLACK           = 87  //!< Weight of 87
+     };
 
 //! Qt font style
-    enum QtFontStyles {
-        QT_STYLE_NORMAL = 0, //!< Normal font.
-        QT_STYLE_ITALIC = 1, //!< Italic font.
-        QT_STYLE_OBLIQUE = 2  //!< Oblique font.
-    };
+enum QtFontStyles {
+        QT_STYLE_NORMAL         = 0, //!< Normal font.
+        QT_STYLE_ITALIC         = 1, //!< Italic font.
+        QT_STYLE_OBLIQUE        = 2  //!< Oblique font.
+     };
 
 //! Qt "button" type
-    enum QtButtonTypes {
-        QT_PUSH_BUTTON = 0,    //!< Push button.
-        QT_CHECKBOX = 1,    //!< Checkbox button.
-        QT_RADIOBOX = 2,    //!< Radiobox button.
-        QT_NEW_BUTTONBAR = 1024  //!< Button should create a new buttonbar
-    };
+enum QtButtonTypes {
+       QT_PUSH_BUTTON   = 0,    //!< Push button.
+       QT_CHECKBOX      = 1,    //!< Checkbox button.
+       QT_RADIOBOX      = 2,    //!< Radiobox button.
+       QT_NEW_BUTTONBAR = 1024  //!< Button should create a new buttonbar
+     };
 
 /** @brief Callback function for mouse events. see cv::setMouseCallback
 @param event one of the cv::MouseEventTypes constants.
@@ -262,24 +258,24 @@ namespace cv {
 @param flags one of the cv::MouseEventFlags constants.
 @param userdata The optional parameter.
  */
-    typedef void (*MouseCallback)(int event, int x, int y, int flags, void *userdata);
+typedef void (*MouseCallback)(int event, int x, int y, int flags, void* userdata);
 
 /** @brief Callback function for Trackbar see cv::createTrackbar
 @param pos current position of the specified trackbar.
 @param userdata The optional parameter.
  */
-    typedef void (*TrackbarCallback)(int pos, void *userdata);
+typedef void (*TrackbarCallback)(int pos, void* userdata);
 
 /** @brief Callback function defined to be called every frame. See cv::setOpenGlDrawCallback
 @param userdata The optional parameter.
  */
-    typedef void (*OpenGlDrawCallback)(void *userdata);
+typedef void (*OpenGlDrawCallback)(void* userdata);
 
 /** @brief Callback function for a button created by cv::createButton
 @param state current state of the button. It could be -1 for a push button, 0 or 1 for a check/radio box button.
 @param userdata The optional parameter.
  */
-    typedef void (*ButtonCallback)(int state, void *userdata);
+typedef void (*ButtonCallback)(int state, void* userdata);
 
 /** @brief Creates a window.
 
@@ -307,7 +303,7 @@ By default, flags == WINDOW_AUTOSIZE | WINDOW_KEEPRATIO | WINDOW_GUI_EXPANDED
 @param winname Name of the window in the window caption that may be used as a window identifier.
 @param flags Flags of the window. The supported flags are: (cv::WindowFlags)
  */
-    CV_EXPORTS_W void namedWindow(const String &winname, int flags = WINDOW_AUTOSIZE);
+CV_EXPORTS_W void namedWindow(const String& winname, int flags = WINDOW_AUTOSIZE);
 
 /** @brief Destroys the specified window.
 
@@ -315,15 +311,15 @@ The function destroyWindow destroys the window with the given name.
 
 @param winname Name of the window to be destroyed.
  */
-    CV_EXPORTS_W void destroyWindow(const String &winname);
+CV_EXPORTS_W void destroyWindow(const String& winname);
 
 /** @brief Destroys all of the HighGUI windows.
 
 The function destroyAllWindows destroys all of the opened HighGUI windows.
  */
-    CV_EXPORTS_W void destroyAllWindows();
+CV_EXPORTS_W void destroyAllWindows();
 
-    CV_EXPORTS_W int startWindowThread();
+CV_EXPORTS_W int startWindowThread();
 
 /** @brief Similar to #waitKey, but returns full key code.
 
@@ -332,7 +328,7 @@ The function destroyAllWindows destroys all of the opened HighGUI windows.
 Key code is implementation specific and depends on used backend: QT/GTK/Win32/etc
 
 */
-    CV_EXPORTS_W int waitKeyEx(int delay = 0);
+CV_EXPORTS_W int waitKeyEx(int delay = 0);
 
 /** @brief Waits for a pressed key.
 
@@ -355,7 +351,7 @@ If there are several HighGUI windows, any of them can be active.
 
 @param delay Delay in milliseconds. 0 is the special value that means "forever".
  */
-    CV_EXPORTS_W int waitKey(int delay = 0);
+CV_EXPORTS_W int waitKey(int delay = 0);
 
 /** @brief Displays an image in the specified window.
 
@@ -391,7 +387,7 @@ videos, it will display the video frame-by-frame)
 @param winname Name of the window.
 @param mat Image to be shown.
  */
-    CV_EXPORTS_W void imshow(const String &winname, InputArray mat);
+CV_EXPORTS_W void imshow(const String& winname, InputArray mat);
 
 /** @brief Resizes window to the specified size
 
@@ -404,13 +400,13 @@ videos, it will display the video frame-by-frame)
 @param width The new window width.
 @param height The new window height.
  */
-    CV_EXPORTS_W void resizeWindow(const String &winname, int width, int height);
+CV_EXPORTS_W void resizeWindow(const String& winname, int width, int height);
 
 /** @overload
 @param winname Window name.
 @param size The new window size.
 */
-    CV_EXPORTS_W void resizeWindow(const String &winname, const cv::Size &size);
+CV_EXPORTS_W void resizeWindow(const String& winname, const cv::Size& size);
 
 /** @brief Moves window to the specified position
 
@@ -418,7 +414,7 @@ videos, it will display the video frame-by-frame)
 @param x The new x-coordinate of the window.
 @param y The new y-coordinate of the window.
  */
-    CV_EXPORTS_W void moveWindow(const String &winname, int x, int y);
+CV_EXPORTS_W void moveWindow(const String& winname, int x, int y);
 
 /** @brief Changes parameters of a window dynamically.
 
@@ -428,13 +424,13 @@ The function setWindowProperty enables changing properties of a window.
 @param prop_id Window property to edit. The supported operation flags are: (cv::WindowPropertyFlags)
 @param prop_value New value of the window property. The supported flags are: (cv::WindowFlags)
  */
-    CV_EXPORTS_W void setWindowProperty(const String &winname, int prop_id, double prop_value);
+CV_EXPORTS_W void setWindowProperty(const String& winname, int prop_id, double prop_value);
 
 /** @brief Updates window title
 @param winname Name of the window.
 @param title New title.
 */
-    CV_EXPORTS_W void setWindowTitle(const String &winname, const String &title);
+CV_EXPORTS_W void setWindowTitle(const String& winname, const String& title);
 
 /** @brief Provides parameters of a window.
 
@@ -445,7 +441,7 @@ The function getWindowProperty returns properties of a window.
 
 @sa setWindowProperty
  */
-    CV_EXPORTS_W double getWindowProperty(const String &winname, int prop_id);
+CV_EXPORTS_W double getWindowProperty(const String& winname, int prop_id);
 
 /** @brief Provides rectangle of image in the window.
 
@@ -455,7 +451,7 @@ The function getWindowImageRect returns the client screen coordinates, width and
 
 @sa resizeWindow moveWindow
  */
-    CV_EXPORTS_W Rect getWindowImageRect(const String &winname);
+CV_EXPORTS_W Rect getWindowImageRect(const String& winname);
 
 /** @example samples/cpp/create_mask.cpp
 This program demonstrates using mouse events and how to make and use a mask image (black and white) .
@@ -466,8 +462,7 @@ This program demonstrates using mouse events and how to make and use a mask imag
 @param onMouse Callback function for mouse events. See OpenCV samples on how to specify and use the callback.
 @param userdata The optional parameter passed to the callback.
  */
-    CV_EXPORTS void
-    setMouseCallback(const String &winname, MouseCallback onMouse, void *userdata = 0);
+CV_EXPORTS void setMouseCallback(const String& winname, MouseCallback onMouse, void* userdata = 0);
 
 /** @brief Gets the mouse-wheel motion delta, when handling mouse-wheel events cv::EVENT_MOUSEWHEEL and
 cv::EVENT_MOUSEHWHEEL.
@@ -489,7 +484,7 @@ Mouse-wheel events are currently supported only on Windows.
 
 @param flags The mouse callback flags parameter.
  */
-    CV_EXPORTS int getMouseWheelDelta(int flags);
+CV_EXPORTS int getMouseWheelDelta(int flags);
 
 /** @brief Selects ROI on the given image.
 Function creates a window and allows user to select a ROI using mouse.
@@ -505,12 +500,11 @@ selection rectangle will correspont to the initial mouse position.
 @note The function sets it's own mouse callback for specified window using cv::setMouseCallback(windowName, ...).
 After finish of work an empty callback will be set for the used window.
  */
-    CV_EXPORTS_W Rect selectROI(const String &windowName, InputArray img, bool showCrosshair = true,
-                                bool fromCenter = false);
+CV_EXPORTS_W Rect selectROI(const String& windowName, InputArray img, bool showCrosshair = true, bool fromCenter = false);
 
 /** @overload
  */
-    CV_EXPORTS_W Rect selectROI(InputArray img, bool showCrosshair = true, bool fromCenter = false);
+CV_EXPORTS_W Rect selectROI(InputArray img, bool showCrosshair = true, bool fromCenter = false);
 
 /** @brief Selects ROIs on the given image.
 Function creates a window and allows user to select a ROIs using mouse.
@@ -527,9 +521,8 @@ selection rectangle will correspont to the initial mouse position.
 @note The function sets it's own mouse callback for specified window using cv::setMouseCallback(windowName, ...).
 After finish of work an empty callback will be set for the used window.
  */
-    CV_EXPORTS_W void selectROIs(const String &windowName, InputArray img,
-                                 CV_OUT std::vector<Rect> &boundingBoxes, bool showCrosshair = true,
-                                 bool fromCenter = false);
+CV_EXPORTS_W void selectROIs(const String& windowName, InputArray img,
+                             CV_OUT std::vector<Rect>& boundingBoxes, bool showCrosshair = true, bool fromCenter = false);
 
 /** @brief Creates a trackbar and attaches it to the specified window.
 
@@ -557,10 +550,10 @@ the NULL pointer, no callbacks are called, but only value is updated.
 @param userdata User data that is passed as is to the callback. It can be used to handle trackbar
 events without using global variables.
  */
-    CV_EXPORTS int createTrackbar(const String &trackbarname, const String &winname,
-                                  int *value, int count,
-                                  TrackbarCallback onChange = 0,
-                                  void *userdata = 0);
+CV_EXPORTS int createTrackbar(const String& trackbarname, const String& winname,
+                              int* value, int count,
+                              TrackbarCallback onChange = 0,
+                              void* userdata = 0);
 
 /** @brief Returns the trackbar position.
 
@@ -574,7 +567,7 @@ panel.
 @param trackbarname Name of the trackbar.
 @param winname Name of the window that is the parent of the trackbar.
  */
-    CV_EXPORTS_W int getTrackbarPos(const String &trackbarname, const String &winname);
+CV_EXPORTS_W int getTrackbarPos(const String& trackbarname, const String& winname);
 
 /** @brief Sets the trackbar position.
 
@@ -589,7 +582,7 @@ panel.
 @param winname Name of the window that is the parent of trackbar.
 @param pos New position.
  */
-    CV_EXPORTS_W void setTrackbarPos(const String &trackbarname, const String &winname, int pos);
+CV_EXPORTS_W void setTrackbarPos(const String& trackbarname, const String& winname, int pos);
 
 /** @brief Sets the trackbar maximum position.
 
@@ -604,7 +597,7 @@ panel.
 @param winname Name of the window that is the parent of trackbar.
 @param maxval New maximum position.
  */
-    CV_EXPORTS_W void setTrackbarMax(const String &trackbarname, const String &winname, int maxval);
+CV_EXPORTS_W void setTrackbarMax(const String& trackbarname, const String& winname, int maxval);
 
 /** @brief Sets the trackbar minimum position.
 
@@ -619,7 +612,7 @@ panel.
 @param winname Name of the window that is the parent of trackbar.
 @param minval New minimum position.
  */
-    CV_EXPORTS_W void setTrackbarMin(const String &trackbarname, const String &winname, int minval);
+CV_EXPORTS_W void setTrackbarMin(const String& trackbarname, const String& winname, int minval);
 
 //! @addtogroup highgui_opengl OpenGL support
 //! @{
@@ -629,7 +622,7 @@ panel.
 @param winname Name of the window.
 @param tex OpenGL 2D texture data.
  */
-    CV_EXPORTS void imshow(const String &winname, const ogl::Texture2D &tex);
+CV_EXPORTS void imshow(const String& winname, const ogl::Texture2D& tex);
 
 /** @brief Sets a callback function to be called to draw on top of displayed image.
 
@@ -671,20 +664,19 @@ callback function below:
 prototyped as void Foo(void\*) .
 @param userdata Pointer passed to the callback function.(__Optional__)
  */
-    CV_EXPORTS void setOpenGlDrawCallback(const String &winname, OpenGlDrawCallback onOpenGlDraw,
-                                          void *userdata = 0);
+CV_EXPORTS void setOpenGlDrawCallback(const String& winname, OpenGlDrawCallback onOpenGlDraw, void* userdata = 0);
 
 /** @brief Sets the specified window as current OpenGL context.
 
 @param winname Name of the window.
  */
-    CV_EXPORTS void setOpenGlContext(const String &winname);
+CV_EXPORTS void setOpenGlContext(const String& winname);
 
 /** @brief Force window to redraw its context and call draw callback ( See cv::setOpenGlDrawCallback ).
 
 @param winname Name of the window.
  */
-    CV_EXPORTS void updateWindow(const String &winname);
+CV_EXPORTS void updateWindow(const String& winname);
 
 //! @} highgui_opengl
 
@@ -693,19 +685,20 @@ prototyped as void Foo(void\*) .
 
 /** @brief QtFont available only for Qt. See cv::fontQt
  */
-    struct QtFont {
-        const char *nameFont;  //!< Name of the font
-        Scalar color;     //!< Color of the font. Scalar(blue_component, green_component, red_component[, alpha_component])
-        int font_face; //!< See cv::QtFontStyles
-        const int *ascii;     //!< font data and metrics
-        const int *greek;
-        const int *cyrillic;
-        float hscale, vscale;
-        float shear;     //!< slope coefficient: 0 - normal, >0 - italic
-        int thickness; //!< See cv::QtFontWeights
-        float dx;        //!< horizontal interval between letters
-        int line_type; //!< PointSize
-    };
+struct QtFont
+{
+    const char* nameFont;  //!< Name of the font
+    Scalar      color;     //!< Color of the font. Scalar(blue_component, green_component, red_component[, alpha_component])
+    int         font_face; //!< See cv::QtFontStyles
+    const int*  ascii;     //!< font data and metrics
+    const int*  greek;
+    const int*  cyrillic;
+    float       hscale, vscale;
+    float       shear;     //!< slope coefficient: 0 - normal, >0 - italic
+    int         thickness; //!< See cv::QtFontWeights
+    float       dx;        //!< horizontal interval between letters
+    int         line_type; //!< PointSize
+};
 
 /** @brief Creates the font to draw a text on an image.
 
@@ -727,9 +720,9 @@ for simplicity.
 @param style Font style. Available operation flags are : cv::QtFontStyles
 @param spacing Spacing between characters. It can be negative or positive.
  */
-    CV_EXPORTS QtFont fontQt(const String &nameFont, int pointSize = -1,
-                             Scalar color = Scalar::all(0), int weight = QT_FONT_NORMAL,
-                             int style = QT_STYLE_NORMAL, int spacing = 0);
+CV_EXPORTS QtFont fontQt(const String& nameFont, int pointSize = -1,
+                         Scalar color = Scalar::all(0), int weight = QT_FONT_NORMAL,
+                         int style = QT_STYLE_NORMAL, int spacing = 0);
 
 /** @brief Draws a text on the image.
 
@@ -741,7 +734,7 @@ The function addText draws *text* on the image *img* using a specific font *font
 @param org Point(x,y) where the text should start on an image.
 @param font Font to use to draw a text.
  */
-    CV_EXPORTS void addText(const Mat &img, const String &text, Point org, const QtFont &font);
+CV_EXPORTS void addText( const Mat& img, const String& text, Point org, const QtFont& font);
 
 /** @brief Draws a text on the image.
 
@@ -757,10 +750,8 @@ font is set to a system-dependent default value. Generally, this is 12 points.
 @param style Font style. Available operation flags are : cv::QtFontStyles
 @param spacing Spacing between characters. It can be negative or positive.
  */
-    CV_EXPORTS_W void addText(const Mat &img, const String &text, Point org, const String &nameFont,
-                              int pointSize = -1, Scalar color = Scalar::all(0),
-                              int weight = QT_FONT_NORMAL, int style = QT_STYLE_NORMAL,
-                              int spacing = 0);
+CV_EXPORTS_W void addText(const Mat& img, const String& text, Point org, const String& nameFont, int pointSize = -1, Scalar color = Scalar::all(0),
+        int weight = QT_FONT_NORMAL, int style = QT_STYLE_NORMAL, int spacing = 0);
 
 /** @brief Displays a text on a window image as an overlay for a specified duration.
 
@@ -774,7 +765,7 @@ after the specified delay the original content of the window is restored.
 function is called before the previous overlay text timed out, the timer is restarted and the text
 is updated. If this value is zero, the text never disappears.
  */
-    CV_EXPORTS_W void displayOverlay(const String &winname, const String &text, int delayms = 0);
+CV_EXPORTS_W void displayOverlay(const String& winname, const String& text, int delayms = 0);
 
 /** @brief Displays a text on the window statusbar during the specified period of time.
 
@@ -788,7 +779,7 @@ created with the CV_GUI_EXPANDED flags).
 the previous text timed out, the timer is restarted and the text is updated. If this value is
 zero, the text never disappears.
  */
-    CV_EXPORTS_W void displayStatusBar(const String &winname, const String &text, int delayms = 0);
+CV_EXPORTS_W void displayStatusBar(const String& winname, const String& text, int delayms = 0);
 
 /** @brief Saves parameters of the specified window.
 
@@ -797,7 +788,7 @@ location of the window windowName.
 
 @param windowName Name of the window.
  */
-    CV_EXPORTS void saveWindowParameters(const String &windowName);
+CV_EXPORTS void saveWindowParameters(const String& windowName);
 
 /** @brief Loads parameters of the specified window.
 
@@ -806,11 +797,11 @@ location of the window windowName.
 
 @param windowName Name of the window.
  */
-    CV_EXPORTS void loadWindowParameters(const String &windowName);
+CV_EXPORTS void loadWindowParameters(const String& windowName);
 
-    CV_EXPORTS int startLoop(int (*pt2Func)(int argc, char *argv[]), int argc, char *argv[]);
+CV_EXPORTS  int startLoop(int (*pt2Func)(int argc, char *argv[]), int argc, char* argv[]);
 
-    CV_EXPORTS void stopLoop();
+CV_EXPORTS  void stopLoop();
 
 /** @brief Attaches a button to the control panel.
 
@@ -838,9 +829,9 @@ of the button. It could be -1 for a push button, 0 or 1 for a check/radio box bu
 @param initial_button_state Default state of the button. Use for checkbox and radiobox. Its
 value could be 0 or 1. (__Optional__)
 */
-    CV_EXPORTS int createButton(const String &bar_name, ButtonCallback on_change,
-                                void *userdata = 0, int type = QT_PUSH_BUTTON,
-                                bool initial_button_state = false);
+CV_EXPORTS int createButton( const String& bar_name, ButtonCallback on_change,
+                             void* userdata = 0, int type = QT_PUSH_BUTTON,
+                             bool initial_button_state = false);
 
 //! @} highgui_qt
 

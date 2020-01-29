@@ -12,12 +12,7 @@
 #define CV__DNN_INLINE_NS __CV_CAT(dnn4_v, OPENCV_DNN_API_VERSION)
 #define CV__DNN_INLINE_NS_BEGIN namespace CV__DNN_INLINE_NS {
 #define CV__DNN_INLINE_NS_END }
-namespace cv {
-    namespace dnn {
-        namespace CV__DNN_INLINE_NS {}
-        using namespace CV__DNN_INLINE_NS;
-    }
-}
+namespace cv { namespace dnn { namespace CV__DNN_INLINE_NS { } using namespace CV__DNN_INLINE_NS; }}
 #else
 #define CV__DNN_INLINE_NS_BEGIN
 #define CV__DNN_INLINE_NS_END

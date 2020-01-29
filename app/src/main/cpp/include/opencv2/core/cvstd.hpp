@@ -61,13 +61,11 @@
 #  include <cstdlib> //for abs(int)
 #  include <cmath>
 
-namespace cv {
+namespace cv
+{
     static inline uchar abs(uchar a) { return a; }
-
     static inline ushort abs(ushort a) { return a; }
-
     static inline unsigned abs(unsigned a) { return a; }
-
     static inline uint64 abs(uint64 a) { return a; }
 
     using std::min;
@@ -95,7 +93,7 @@ The function allocates the buffer of the specified size and returns it. When the
 bytes or more, the returned buffer is aligned to 16 bytes.
 @param bufSize Allocated buffer size.
  */
-    CV_EXPORTS void *fastMalloc(size_t bufSize);
+CV_EXPORTS void* fastMalloc(size_t bufSize);
 
 /** @brief Deallocates a memory buffer.
 
@@ -104,53 +102,41 @@ function does nothing. C version of the function clears the pointer *pptr* to av
 double memory deallocation.
 @param ptr Pointer to the allocated buffer.
  */
-    CV_EXPORTS void fastFree(void *ptr);
+CV_EXPORTS void fastFree(void* ptr);
 
 /*!
   The STL-compliant memory Allocator based on cv::fastMalloc() and cv::fastFree()
 */
-    template<typename _Tp>
-    class Allocator {
-    public:
-        typedef _Tp value_type;
-        typedef value_type *pointer;
-        typedef const value_type *const_pointer;
-        typedef value_type &reference;
-        typedef const value_type &const_reference;
-        typedef size_t size_type;
-        typedef ptrdiff_t difference_type;
+template<typename _Tp> class Allocator
+{
+public:
+    typedef _Tp value_type;
+    typedef value_type* pointer;
+    typedef const value_type* const_pointer;
+    typedef value_type& reference;
+    typedef const value_type& const_reference;
+    typedef size_t size_type;
+    typedef ptrdiff_t difference_type;
+    template<typename U> class rebind { typedef Allocator<U> other; };
 
-        template<typename U>
-        class rebind {
-            typedef Allocator<U> other;
-        };
+    explicit Allocator() {}
+    ~Allocator() {}
+    explicit Allocator(Allocator const&) {}
+    template<typename U>
+    explicit Allocator(Allocator<U> const&) {}
 
-        explicit Allocator() {}
+    // address
+    pointer address(reference r) { return &r; }
+    const_pointer address(const_reference r) { return &r; }
 
-        ~Allocator() {}
+    pointer allocate(size_type count, const void* =0) { return reinterpret_cast<pointer>(fastMalloc(count * sizeof (_Tp))); }
+    void deallocate(pointer p, size_type) { fastFree(p); }
 
-        explicit Allocator(Allocator const &) {}
+    void construct(pointer p, const _Tp& v) { new(static_cast<void*>(p)) _Tp(v); }
+    void destroy(pointer p) { p->~_Tp(); }
 
-        template<typename U>
-        explicit Allocator(Allocator<U> const &) {}
-
-        // address
-        pointer address(reference r) { return &r; }
-
-        const_pointer address(const_reference r) { return &r; }
-
-        pointer allocate(size_type count, const void * = 0) {
-            return reinterpret_cast<pointer>(fastMalloc(count * sizeof(_Tp)));
-        }
-
-        void deallocate(pointer p, size_type) { fastFree(p); }
-
-        void construct(pointer p, const _Tp &v) { new(static_cast<void *>(p)) _Tp(v); }
-
-        void destroy(pointer p) { p->~_Tp(); }
-
-        size_type max_size() const { return cv::max(static_cast<_Tp>(-1) / sizeof(_Tp), 1); }
-    };
+    size_type max_size() const { return cv::max(static_cast<_Tp>(-1)/sizeof(_Tp), 1); }
+};
 
 //! @} core_utils
 
@@ -161,37 +147,40 @@ double memory deallocation.
 
 //////////////////////////////// string class ////////////////////////////////
 
-    class CV_EXPORTS FileNode; //for string constructor from FileNode
+class CV_EXPORTS FileNode; //for string constructor from FileNode
 
-    typedef std::string String;
+typedef std::string String;
 
 #ifndef OPENCV_DISABLE_STRING_LOWER_UPPER_CONVERSIONS
 
 //! @cond IGNORED
-    namespace details {
+namespace details {
 // std::tolower is int->int
-        static inline char char_tolower(char ch) {
-            return (char) std::tolower((int) ch);
-        }
-
+static inline char char_tolower(char ch)
+{
+    return (char)std::tolower((int)ch);
+}
 // std::toupper is int->int
-        static inline char char_toupper(char ch) {
-            return (char) std::toupper((int) ch);
-        }
-    } // namespace details
+static inline char char_toupper(char ch)
+{
+    return (char)std::toupper((int)ch);
+}
+} // namespace details
 //! @endcond
 
-    static inline std::string toLowerCase(const std::string &str) {
-        std::string result(str);
-        std::transform(result.begin(), result.end(), result.begin(), details::char_tolower);
-        return result;
-    }
+static inline std::string toLowerCase(const std::string& str)
+{
+    std::string result(str);
+    std::transform(result.begin(), result.end(), result.begin(), details::char_tolower);
+    return result;
+}
 
-    static inline std::string toUpperCase(const std::string &str) {
-        std::string result(str);
-        std::transform(result.begin(), result.end(), result.begin(), details::char_toupper);
-        return result;
-    }
+static inline std::string toUpperCase(const std::string& str)
+{
+    std::string result(str);
+    std::transform(result.begin(), result.end(), result.begin(), details::char_toupper);
+    return result;
+}
 
 #endif // OPENCV_DISABLE_STRING_LOWER_UPPER_CONVERSIONS
 

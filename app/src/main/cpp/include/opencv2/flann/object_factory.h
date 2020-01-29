@@ -35,52 +35,58 @@
 
 #include <map>
 
-namespace cvflann {
+namespace cvflann
+{
 
-    class CreatorNotFound {
-    };
+class CreatorNotFound
+{
+};
 
-    template<typename BaseClass,
-            typename UniqueIdType,
-            typename ObjectCreator = BaseClass *(*)()>
-    class ObjectFactory {
-        typedef ObjectFactory<BaseClass, UniqueIdType, ObjectCreator> ThisClass;
-        typedef std::map <UniqueIdType, ObjectCreator> ObjectRegistry;
+template<typename BaseClass,
+         typename UniqueIdType,
+         typename ObjectCreator = BaseClass* (*)()>
+class ObjectFactory
+{
+    typedef ObjectFactory<BaseClass,UniqueIdType,ObjectCreator> ThisClass;
+    typedef std::map<UniqueIdType, ObjectCreator> ObjectRegistry;
 
-        // singleton class, private constructor
-        ObjectFactory() {}
+    // singleton class, private constructor
+    ObjectFactory() {}
 
-    public:
+public:
 
-        bool subscribe(UniqueIdType id, ObjectCreator creator) {
-            if (object_registry.find(id) != object_registry.end()) return false;
+    bool subscribe(UniqueIdType id, ObjectCreator creator)
+    {
+        if (object_registry.find(id) != object_registry.end()) return false;
 
-            object_registry[id] = creator;
-            return true;
+        object_registry[id] = creator;
+        return true;
+    }
+
+    bool unregister(UniqueIdType id)
+    {
+        return object_registry.erase(id) == 1;
+    }
+
+    ObjectCreator create(UniqueIdType id)
+    {
+        typename ObjectRegistry::const_iterator iter = object_registry.find(id);
+
+        if (iter == object_registry.end()) {
+            throw CreatorNotFound();
         }
 
-        bool unregister(UniqueIdType id) {
-            return object_registry.erase(id) == 1;
-        }
+        return iter->second;
+    }
 
-        ObjectCreator create(UniqueIdType id) {
-            typename ObjectRegistry::const_iterator iter = object_registry.find(id);
-
-            if (iter == object_registry.end()) {
-                throw CreatorNotFound();
-            }
-
-            return iter->second;
-        }
-
-        static ThisClass &instance() {
-            static ThisClass the_factory;
-            return the_factory;
-        }
-
-    private:
-        ObjectRegistry object_registry;
-    };
+    static ThisClass& instance()
+    {
+        static ThisClass the_factory;
+        return the_factory;
+    }
+private:
+    ObjectRegistry object_registry;
+};
 
 }
 

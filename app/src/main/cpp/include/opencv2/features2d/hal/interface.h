@@ -17,15 +17,15 @@
 //! @sa cv::KeyPoint
 //! @{
 struct CV_EXPORTS cvhalKeyPoint
-        {
-                float x;
-        float y;
-        float size;
-        float angle;
-        float response;
-        int octave;
-        int class_id;
-        };
+{
+    float x;
+    float y;
+    float size;
+    float angle;
+    float response;
+    int octave;
+    int class_id;
+};
 //! @}
 
 //! @}

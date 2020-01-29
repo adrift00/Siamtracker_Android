@@ -4,9 +4,10 @@
 
 //! @cond IGNORED
 
-namespace cvflann {
+namespace cvflann
+{
 
-    CV_DEPRECATED inline void dummyfunc() {}
+CV_DEPRECATED inline void dummyfunc() {}
 
 }
 

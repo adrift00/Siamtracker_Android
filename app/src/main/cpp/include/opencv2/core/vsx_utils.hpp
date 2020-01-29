@@ -8,9 +8,7 @@
 #include "opencv2/core/cvdef.h"
 
 #ifndef SKIP_INCLUDES
-
 #   include <assert.h>
-
 #endif
 
 //! @addtogroup core_utils_vsx
@@ -129,12 +127,12 @@ VSX_FINLINE(rt) fnm(const rg& a, const rg& b)  \
 #if __GNUG__ < 8
 
     // Support for int4 -> dword2 expanding multiply was added in GCC 8.
-#ifdef vec_mule
-#undef vec_mule
-#endif
-#ifdef vec_mulo
-#undef vec_mulo
-#endif
+    #ifdef vec_mule
+        #undef vec_mule
+    #endif
+    #ifdef vec_mulo
+        #undef vec_mulo
+    #endif
 
     VSX_REDIRECT_2RG(vec_ushort8,  vec_uchar16,  vec_mule, __builtin_vec_mule)
     VSX_REDIRECT_2RG(vec_short8,  vec_char16,  vec_mule, __builtin_vec_mule)
@@ -168,10 +166,10 @@ VSX_FINLINE(rt) fnm(const rg& a, const rg& b)  \
         static const vec_uchar16 ev_od = {cperm};                            \
         return vec_perm((Tvec)vec_mule(a, b), (Tvec)vec_mulo(a, b), ev_od);  \
     }
-#define VSX_IMPL_MULH_P16 0, 16, 2, 18, 4, 20, 6, 22, 8, 24, 10, 26, 12, 28, 14, 30
+    #define VSX_IMPL_MULH_P16 0, 16, 2, 18, 4, 20, 6, 22, 8, 24, 10, 26, 12, 28, 14, 30
     VSX_IMPL_MULH(vec_char16,  VSX_IMPL_MULH_P16)
     VSX_IMPL_MULH(vec_uchar16, VSX_IMPL_MULH_P16)
-#define VSX_IMPL_MULH_P8 0, 1, 16, 17, 4, 5, 20, 21, 8, 9, 24, 25, 12, 13, 28, 29
+    #define VSX_IMPL_MULH_P8 0, 1, 16, 17, 4, 5, 20, 21, 8, 9, 24, 25, 12, 13, 28, 29
     VSX_IMPL_MULH(vec_short8,  VSX_IMPL_MULH_P8)
     VSX_IMPL_MULH(vec_ushort8, VSX_IMPL_MULH_P8)
     // vmuluwm can be used for unsigned or signed integers, that's what they said

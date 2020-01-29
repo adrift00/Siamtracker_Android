@@ -9,19 +9,20 @@
 #include "logger.defines.hpp"
 
 namespace cv {
-    namespace utils {
-        namespace logging {
+namespace utils {
+namespace logging {
 
-            struct LogTag {
-                const char *name;
-                LogLevel level;
+struct LogTag
+{
+    const char* name;
+    LogLevel level;
 
-                inline LogTag(const char *_name, LogLevel _level)
-                        : name(_name), level(_level) {}
-            };
+    inline LogTag(const char* _name, LogLevel _level)
+        : name(_name)
+        , level(_level)
+    {}
+};
 
-        }
-    }
-}
+}}}
 
 #endif

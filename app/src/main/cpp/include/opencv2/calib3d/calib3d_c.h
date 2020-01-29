@@ -62,7 +62,8 @@ extern "C" {
 #define CV_FM_LMEDS CV_LMEDS
 #define CV_FM_RANSAC CV_RANSAC
 
-enum {
+enum
+{
     CV_ITERATIVE = 0,
     CV_EPNP = 1, // F.Moreno-Noguer, V.Lepetit and P.Fua "EPnP: Efficient Perspective-n-Point Camera Pose Estimation"
     CV_P3P = 2, // X.S. Gao, X.-R. Hou, J. Tang, H.-F. Chang; "Complete Solution Classification for the Perspective-Three-Point Problem"

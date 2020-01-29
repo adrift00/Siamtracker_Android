@@ -19,51 +19,51 @@ namespace cv {
 /** @brief Provides result of asynchronous operations
 
 */
-    class CV_EXPORTS AsyncPromise
-            {
-                    public:
-                    ~AsyncPromise() CV_NOEXCEPT;
-                    AsyncPromise() CV_NOEXCEPT;
-                    explicit AsyncPromise(const AsyncPromise& o) CV_NOEXCEPT;
-                    AsyncPromise& operator=(const AsyncPromise& o) CV_NOEXCEPT;
-                    void release() CV_NOEXCEPT;
+class CV_EXPORTS AsyncPromise
+{
+public:
+    ~AsyncPromise() CV_NOEXCEPT;
+    AsyncPromise() CV_NOEXCEPT;
+    explicit AsyncPromise(const AsyncPromise& o) CV_NOEXCEPT;
+    AsyncPromise& operator=(const AsyncPromise& o) CV_NOEXCEPT;
+    void release() CV_NOEXCEPT;
 
-                    /** Returns associated AsyncArray
-                    @note Can be called once
-                    */
-                    AsyncArray getArrayResult();
+    /** Returns associated AsyncArray
+    @note Can be called once
+    */
+    AsyncArray getArrayResult();
 
-                    /** Stores asynchronous result.
-                    @param[in] value result
-                    */
-                    void setValue(InputArray value);
+    /** Stores asynchronous result.
+    @param[in] value result
+    */
+    void setValue(InputArray value);
 
-                    // TODO "move" setters
+    // TODO "move" setters
 
 #if CV__EXCEPTION_PTR
-                    /** Stores exception.
-                    @param[in] exception exception to be raised in AsyncArray
-                    */
-                    void setException(std::exception_ptr exception);
+    /** Stores exception.
+    @param[in] exception exception to be raised in AsyncArray
+    */
+    void setException(std::exception_ptr exception);
 #endif
 
-                    /** Stores exception.
-                    @param[in] exception exception to be raised in AsyncArray
-                    */
-                    void setException(const cv::Exception& exception);
+    /** Stores exception.
+    @param[in] exception exception to be raised in AsyncArray
+    */
+    void setException(const cv::Exception& exception);
 
 #ifdef CV_CXX11
-                    explicit AsyncPromise(AsyncPromise&& o) { p = o.p; o.p = NULL; }
-                    AsyncPromise& operator=(AsyncPromise&& o) CV_NOEXCEPT { std::swap(p, o.p); return *this; }
+    explicit AsyncPromise(AsyncPromise&& o) { p = o.p; o.p = NULL; }
+    AsyncPromise& operator=(AsyncPromise&& o) CV_NOEXCEPT { std::swap(p, o.p); return *this; }
 #endif
 
 
-                    // PImpl
-                    typedef struct AsyncArray::Impl Impl; friend struct AsyncArray::Impl;
-                    inline void* _getImpl() const CV_NOEXCEPT { return p; }
-                    protected:
-                    Impl* p;
-            };
+    // PImpl
+    typedef struct AsyncArray::Impl Impl; friend struct AsyncArray::Impl;
+    inline void* _getImpl() const CV_NOEXCEPT { return p; }
+protected:
+    Impl* p;
+};
 
 
 //! @}

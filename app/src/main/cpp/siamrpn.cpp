@@ -114,13 +114,6 @@ Rect SiamRPN_MNN::track(cv::Mat img) {
     float *loc_ptr = loc_host->host<float>();
     //TODO: ANHCOR_NUM
     int pred_size = score_size_ * score_size_ * 5;
-    //debug
-    //MNN::Tensor* conv_out = search_interp_->getSessionOutput(search_sess_, "92");
-    //conv_out->print();
-    //cls_host->print();
-    //loc_host->print();
-    //std::cout << cls_ptr[0] << cls_ptr[pred_size] << std::endl;
-    //debug
     std::vector<float> score(pred_size);
     std::vector<float> pscore(pred_size);
     std::vector<Rect> pred_bbox(pred_size);

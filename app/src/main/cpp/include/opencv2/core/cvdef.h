@@ -134,11 +134,11 @@ namespace cv {
 
 // Suppress warning "-Wdeprecated-declarations" / C4996
 #if defined(_MSC_VER)
-#define CV_DO_PRAGMA(x) __pragma(x)
+    #define CV_DO_PRAGMA(x) __pragma(x)
 #elif defined(__GNUC__)
-#define CV_DO_PRAGMA(x) _Pragma (#x)
+    #define CV_DO_PRAGMA(x) _Pragma (#x)
 #else
-#define CV_DO_PRAGMA(x)
+    #define CV_DO_PRAGMA(x)
 #endif
 
 #ifdef _MSC_VER
@@ -146,7 +146,7 @@ namespace cv {
     CV_DO_PRAGMA(warning(push)) \
     CV_DO_PRAGMA(warning(disable: 4996))
 #define CV_SUPPRESS_DEPRECATED_END CV_DO_PRAGMA(warning(pop))
-#elif defined (__clang__) || ((__GNUC__) && (__GNUC__ * 100 + __GNUC_MINOR__ > 405))
+#elif defined (__clang__) || ((__GNUC__)  && (__GNUC__*100 + __GNUC_MINOR__ > 405))
 #define CV_SUPPRESS_DEPRECATED_START \
     CV_DO_PRAGMA(GCC diagnostic push) \
     CV_DO_PRAGMA(GCC diagnostic ignored "-Wdeprecated-declarations")
@@ -270,52 +270,52 @@ namespace cv {
 /** @brief Available CPU features.
 */
 enum CpuFeatures {
-    CPU_MMX = 1,
-    CPU_SSE = 2,
-    CPU_SSE2 = 3,
-    CPU_SSE3 = 4,
-    CPU_SSSE3 = 5,
-    CPU_SSE4_1 = 6,
-    CPU_SSE4_2 = 7,
-    CPU_POPCNT = 8,
-    CPU_FP16 = 9,
-    CPU_AVX = 10,
-    CPU_AVX2 = 11,
-    CPU_FMA3 = 12,
+    CPU_MMX             = 1,
+    CPU_SSE             = 2,
+    CPU_SSE2            = 3,
+    CPU_SSE3            = 4,
+    CPU_SSSE3           = 5,
+    CPU_SSE4_1          = 6,
+    CPU_SSE4_2          = 7,
+    CPU_POPCNT          = 8,
+    CPU_FP16            = 9,
+    CPU_AVX             = 10,
+    CPU_AVX2            = 11,
+    CPU_FMA3            = 12,
 
-    CPU_AVX_512F = 13,
-    CPU_AVX_512BW = 14,
-    CPU_AVX_512CD = 15,
-    CPU_AVX_512DQ = 16,
-    CPU_AVX_512ER = 17,
-    CPU_AVX_512IFMA512 = 18, // deprecated
-    CPU_AVX_512IFMA = 18,
-    CPU_AVX_512PF = 19,
-    CPU_AVX_512VBMI = 20,
-    CPU_AVX_512VL = 21,
-    CPU_AVX_512VBMI2 = 22,
-    CPU_AVX_512VNNI = 23,
-    CPU_AVX_512BITALG = 24,
-    CPU_AVX_512VPOPCNTDQ = 25,
-    CPU_AVX_5124VNNIW = 26,
-    CPU_AVX_5124FMAPS = 27,
+    CPU_AVX_512F        = 13,
+    CPU_AVX_512BW       = 14,
+    CPU_AVX_512CD       = 15,
+    CPU_AVX_512DQ       = 16,
+    CPU_AVX_512ER       = 17,
+    CPU_AVX_512IFMA512  = 18, // deprecated
+    CPU_AVX_512IFMA     = 18,
+    CPU_AVX_512PF       = 19,
+    CPU_AVX_512VBMI     = 20,
+    CPU_AVX_512VL       = 21,
+    CPU_AVX_512VBMI2    = 22,
+    CPU_AVX_512VNNI     = 23,
+    CPU_AVX_512BITALG   = 24,
+    CPU_AVX_512VPOPCNTDQ= 25,
+    CPU_AVX_5124VNNIW   = 26,
+    CPU_AVX_5124FMAPS   = 27,
 
-    CPU_NEON = 100,
+    CPU_NEON            = 100,
 
-    CPU_MSA = 150,
+    CPU_MSA             = 150,
 
-    CPU_VSX = 200,
-    CPU_VSX3 = 201,
+    CPU_VSX             = 200,
+    CPU_VSX3            = 201,
 
-    CPU_AVX512_SKX = 256, //!< Skylake-X with AVX-512F/CD/BW/DQ/VL
-    CPU_AVX512_COMMON = 257, //!< Common instructions AVX-512F/CD for all CPUs that support AVX-512
-    CPU_AVX512_KNL = 258, //!< Knights Landing with AVX-512F/CD/ER/PF
-    CPU_AVX512_KNM = 259, //!< Knights Mill with AVX-512F/CD/ER/PF/4FMAPS/4VNNIW/VPOPCNTDQ
-    CPU_AVX512_CNL = 260, //!< Cannon Lake with AVX-512F/CD/BW/DQ/VL/IFMA/VBMI
-    CPU_AVX512_CLX = 261, //!< Cascade Lake with AVX-512F/CD/BW/DQ/VL/VNNI
-    CPU_AVX512_ICL = 262, //!< Ice Lake with AVX-512F/CD/BW/DQ/VL/IFMA/VBMI/VNNI/VBMI2/BITALG/VPOPCNTDQ
+    CPU_AVX512_SKX      = 256, //!< Skylake-X with AVX-512F/CD/BW/DQ/VL
+    CPU_AVX512_COMMON   = 257, //!< Common instructions AVX-512F/CD for all CPUs that support AVX-512
+    CPU_AVX512_KNL      = 258, //!< Knights Landing with AVX-512F/CD/ER/PF
+    CPU_AVX512_KNM      = 259, //!< Knights Mill with AVX-512F/CD/ER/PF/4FMAPS/4VNNIW/VPOPCNTDQ
+    CPU_AVX512_CNL      = 260, //!< Cannon Lake with AVX-512F/CD/BW/DQ/VL/IFMA/VBMI
+    CPU_AVX512_CLX      = 261, //!< Cascade Lake with AVX-512F/CD/BW/DQ/VL/VNNI
+    CPU_AVX512_ICL      = 262, //!< Ice Lake with AVX-512F/CD/BW/DQ/VL/IFMA/VBMI/VNNI/VBMI2/BITALG/VPOPCNTDQ
 
-    CPU_MAX_FEATURE = 512  // see CV_HARDWARE_MAX_FEATURE
+    CPU_MAX_FEATURE     = 512  // see CV_HARDWARE_MAX_FEATURE
 };
 
 
@@ -334,28 +334,31 @@ enum CpuFeatures {
 #  define CV_FP16_TYPE 0
 #endif
 
-typedef union Cv16suf {
+typedef union Cv16suf
+{
     short i;
     ushort u;
 #if CV_FP16_TYPE
     __fp16 h;
 #endif
 }
-        Cv16suf;
+Cv16suf;
 
-typedef union Cv32suf {
+typedef union Cv32suf
+{
     int i;
     unsigned u;
     float f;
 }
-        Cv32suf;
+Cv32suf;
 
-typedef union Cv64suf {
+typedef union Cv64suf
+{
     int64 i;
     uint64 u;
     double f;
 }
-        Cv64suf;
+Cv64suf;
 
 #define OPENCV_ABI_COMPATIBILITY 400
 
@@ -447,11 +450,11 @@ typedef union Cv64suf {
 #define CV_ELEM_SIZE(type) (CV_MAT_CN(type)*CV_ELEM_SIZE1(type))
 
 #ifndef MIN
-#  define MIN(a, b)  ((a) > (b) ? (b) : (a))
+#  define MIN(a,b)  ((a) > (b) ? (b) : (a))
 #endif
 
 #ifndef MAX
-#  define MAX(a, b)  ((a) < (b) ? (b) : (a))
+#  define MAX(a,b)  ((a) < (b) ? (b) : (a))
 #endif
 
 ///////////////////////////////////////// Enum operators ///////////////////////////////////////
@@ -624,9 +627,9 @@ __CV_ENUM_FLAGS_BITWISE_XOR_EQ   (EnumType, EnumType)                           
 \****************************************************************************************/
 
 #ifdef CV_XADD
-// allow to use user-defined macro
+  // allow to use user-defined macro
 #elif defined __GNUC__ || defined __clang__
-#  if defined __clang__ && __clang_major__ >= 3 && !defined __ANDROID__ && !defined __EMSCRIPTEN__ && !defined(__CUDACC__) && !defined __INTEL_COMPILER
+#  if defined __clang__ && __clang_major__ >= 3 && !defined __ANDROID__ && !defined __EMSCRIPTEN__ && !defined(__CUDACC__)  && !defined __INTEL_COMPILER
 #    ifdef __ATOMIC_ACQ_REL
 #      define CV_XADD(addr, delta) __c11_atomic_fetch_add((_Atomic(int)*)(addr), delta, __ATOMIC_ACQ_REL)
 #    else
@@ -634,7 +637,7 @@ __CV_ENUM_FLAGS_BITWISE_XOR_EQ   (EnumType, EnumType)                           
 #    endif
 #  else
 #    if defined __ATOMIC_ACQ_REL && !defined __clang__
-// version for gcc >= 4.7
+       // version for gcc >= 4.7
 #      define CV_XADD(addr, delta) (int)__atomic_fetch_add((unsigned*)(addr), (unsigned)(delta), __ATOMIC_ACQ_REL)
 #    else
 #      define CV_XADD(addr, delta) (int)__sync_fetch_and_add((unsigned*)(addr), (unsigned)(delta))
@@ -644,11 +647,11 @@ __CV_ENUM_FLAGS_BITWISE_XOR_EQ   (EnumType, EnumType)                           
 #  include <intrin.h>
 #  define CV_XADD(addr, delta) (int)_InterlockedExchangeAdd((long volatile*)addr, delta)
 #else
-#ifdef OPENCV_FORCE_UNSAFE_XADD
-CV_INLINE CV_XADD(int* addr, int delta) { int tmp = *addr; *addr += delta; return tmp; }
-#else
-#error "OpenCV: can't define safe CV_XADD macro for current platform (unsupported). Define CV_XADD macro through custom port header (see OPENCV_INCLUDE_PORT_FILE)"
-#endif
+  #ifdef OPENCV_FORCE_UNSAFE_XADD
+    CV_INLINE CV_XADD(int* addr, int delta) { int tmp = *addr; *addr += delta; return tmp; }
+  #else
+    #error "OpenCV: can't define safe CV_XADD macro for current platform (unsupported). Define CV_XADD macro through custom port header (see OPENCV_INCLUDE_PORT_FILE)"
+  #endif
 #endif
 
 
@@ -704,9 +707,7 @@ CV_INLINE CV_XADD(int* addr, int delta) { int tmp = *addr; *addr += delta; retur
 #define CV_CXX_MOVE_SEMANTICS 1
 #define CV_CXX_MOVE(x) std::move(x)
 #define CV_CXX_STD_ARRAY 1
-
 #include <array>
-
 #ifndef CV_OVERRIDE
 #  define CV_OVERRIDE override
 #endif
@@ -748,18 +749,16 @@ typedef signed __int64 int64_t;
 typedef unsigned __int64 uint64_t;
 }
 #elif defined(_MSC_VER) || __cplusplus >= 201103L
-
 #include <cstdint>
-
 namespace cv {
-    using std::int8_t;
-    using std::uint8_t;
-    using std::int16_t;
-    using std::uint16_t;
-    using std::int32_t;
-    using std::uint32_t;
-    using std::int64_t;
-    using std::uint64_t;
+using std::int8_t;
+using std::uint8_t;
+using std::int16_t;
+using std::uint16_t;
+using std::int32_t;
+using std::uint32_t;
+using std::int64_t;
+using std::uint64_t;
 }
 #else
 #include <stdint.h>
@@ -779,112 +778,111 @@ typedef ::uint64_t uint64_t;
 #endif
 
 #ifdef __cplusplus
-namespace cv {
+namespace cv
+{
 
-    class float16_t {
-    public:
+class float16_t
+{
+public:
 #if CV_FP16_TYPE
 
-        float16_t() : h(0) {}
-
-        explicit float16_t(float x) { h = (__fp16) x; }
-
-        operator float() const { return (float) h; }
-
-        static float16_t fromBits(ushort w) {
-            Cv16suf u;
-            u.u = w;
-            float16_t result;
-            result.h = u.h;
-            return result;
-        }
-
-        static float16_t zero() {
-            float16_t result;
-            result.h = (__fp16) 0;
-            return result;
-        }
-
-        ushort bits() const {
-            Cv16suf u;
-            u.h = h;
-            return u.u;
-        }
-
-    protected:
-        __fp16 h;
+    float16_t() : h(0) {}
+    explicit float16_t(float x) { h = (__fp16)x; }
+    operator float() const { return (float)h; }
+    static float16_t fromBits(ushort w)
+    {
+        Cv16suf u;
+        u.u = w;
+        float16_t result;
+        result.h = u.h;
+        return result;
+    }
+    static float16_t zero()
+    {
+        float16_t result;
+        result.h = (__fp16)0;
+        return result;
+    }
+    ushort bits() const
+    {
+        Cv16suf u;
+        u.h = h;
+        return u.u;
+    }
+protected:
+    __fp16 h;
 
 #else
-        float16_t() : w(0) {}
-        explicit float16_t(float x)
+    float16_t() : w(0) {}
+    explicit float16_t(float x)
+    {
+    #if CV_AVX2
+        __m128 v = _mm_load_ss(&x);
+        w = (ushort)_mm_cvtsi128_si32(_mm_cvtps_ph(v, 0));
+    #else
+        Cv32suf in;
+        in.f = x;
+        unsigned sign = in.u & 0x80000000;
+        in.u ^= sign;
+
+        if( in.u >= 0x47800000 )
+            w = (ushort)(in.u > 0x7f800000 ? 0x7e00 : 0x7c00);
+        else
         {
-#if CV_AVX2
-            __m128 v = _mm_load_ss(&x);
-            w = (ushort)_mm_cvtsi128_si32(_mm_cvtps_ph(v, 0));
-#else
-            Cv32suf in;
-            in.f = x;
-            unsigned sign = in.u & 0x80000000;
-            in.u ^= sign;
-
-            if( in.u >= 0x47800000 )
-                w = (ushort)(in.u > 0x7f800000 ? 0x7e00 : 0x7c00);
+            if (in.u < 0x38800000)
+            {
+                in.f += 0.5f;
+                w = (ushort)(in.u - 0x3f000000);
+            }
             else
             {
-                if (in.u < 0x38800000)
-                {
-                    in.f += 0.5f;
-                    w = (ushort)(in.u - 0x3f000000);
-                }
-                else
-                {
-                    unsigned t = in.u + 0xc8000fff;
-                    w = (ushort)((t + ((in.u >> 13) & 1)) >> 13);
-                }
+                unsigned t = in.u + 0xc8000fff;
+                w = (ushort)((t + ((in.u >> 13) & 1)) >> 13);
             }
+        }
 
-            w = (ushort)(w | (sign >> 16));
+        w = (ushort)(w | (sign >> 16));
+    #endif
+    }
+
+    operator float() const
+    {
+    #if CV_AVX2
+        float f;
+        _mm_store_ss(&f, _mm_cvtph_ps(_mm_cvtsi32_si128(w)));
+        return f;
+    #else
+        Cv32suf out;
+
+        unsigned t = ((w & 0x7fff) << 13) + 0x38000000;
+        unsigned sign = (w & 0x8000) << 16;
+        unsigned e = w & 0x7c00;
+
+        out.u = t + (1 << 23);
+        out.u = (e >= 0x7c00 ? t + 0x38000000 :
+                 e == 0 ? (static_cast<void>(out.f -= 6.103515625e-05f), out.u) : t) | sign;
+        return out.f;
+    #endif
+    }
+
+    static float16_t fromBits(ushort b)
+    {
+        float16_t result;
+        result.w = b;
+        return result;
+    }
+    static float16_t zero()
+    {
+        float16_t result;
+        result.w = (ushort)0;
+        return result;
+    }
+    ushort bits() const { return w; }
+protected:
+    ushort w;
+
 #endif
-        }
-
-        operator float() const
-        {
-#if CV_AVX2
-            float f;
-            _mm_store_ss(&f, _mm_cvtph_ps(_mm_cvtsi32_si128(w)));
-            return f;
-#else
-            Cv32suf out;
-
-            unsigned t = ((w & 0x7fff) << 13) + 0x38000000;
-            unsigned sign = (w & 0x8000) << 16;
-            unsigned e = w & 0x7c00;
-
-            out.u = t + (1 << 23);
-            out.u = (e >= 0x7c00 ? t + 0x38000000 :
-                     e == 0 ? (static_cast<void>(out.f -= 6.103515625e-05f), out.u) : t) | sign;
-            return out.f;
-#endif
-        }
-
-        static float16_t fromBits(ushort b)
-        {
-            float16_t result;
-            result.w = b;
-            return result;
-        }
-        static float16_t zero()
-        {
-            float16_t result;
-            result.w = (ushort)0;
-            return result;
-        }
-        ushort bits() const { return w; }
-    protected:
-        ushort w;
-
-#endif
-    };
+};
 
 }
 #endif

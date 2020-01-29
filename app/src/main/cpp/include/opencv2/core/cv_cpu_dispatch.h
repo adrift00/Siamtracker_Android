@@ -193,6 +193,7 @@ struct VZeroUpperGuard {
 #endif // __OPENCV_BUILD
 
 
+
 #if !defined __OPENCV_BUILD /* Compatibility code */ \
     && !defined __CUDACC__ /* do not include SSE/AVX/NEON headers for NVCC compiler */
 #if defined __SSE2__ || defined _M_X64 || (defined _M_IX86_FP && _M_IX86_FP >= 2)
@@ -205,9 +206,7 @@ struct VZeroUpperGuard {
 # include <arm_neon.h>
 # define CV_NEON 1
 #elif defined(__ARM_NEON__) || (defined (__ARM_NEON) && defined(__aarch64__))
-
 #  include <arm_neon.h>
-
 #  define CV_NEON 1
 #elif defined(__VSX__) && defined(__PPC64__) && defined(__LITTLE_ENDIAN__)
 #  include <altivec.h>
@@ -218,6 +217,7 @@ struct VZeroUpperGuard {
 #endif
 
 #endif // !__OPENCV_BUILD && !__CUDACC (Compatibility code)
+
 
 
 #ifndef CV_MMX

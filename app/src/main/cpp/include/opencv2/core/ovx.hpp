@@ -13,15 +13,16 @@
 
 #include "cvdef.h"
 
-namespace cv {
+namespace cv
+{
 /// Check if use of OpenVX is possible
-    CV_EXPORTS_W bool haveOpenVX();
+CV_EXPORTS_W bool haveOpenVX();
 
 /// Check if use of OpenVX is enabled
-    CV_EXPORTS_W bool useOpenVX();
+CV_EXPORTS_W bool useOpenVX();
 
 /// Enable/disable use of OpenVX
-    CV_EXPORTS_W void setUseOpenVX(bool flag);
+CV_EXPORTS_W void setUseOpenVX(bool flag);
 } // namespace cv
 
 #endif // OPENCV_OVX_HPP

@@ -10,41 +10,41 @@
 namespace cv {
 
 /** Returns string of cv::Mat depth value: CV_8U -> "CV_8U" or "<invalid depth>" */
-    CV_EXPORTS const char *depthToString(int depth);
+CV_EXPORTS const char* depthToString(int depth);
 
 /** Returns string of cv::Mat depth value: CV_8UC3 -> "CV_8UC3" or "<invalid type>" */
-    CV_EXPORTS const String typeToString(int type);
+CV_EXPORTS const String typeToString(int type);
 
 
 //! @cond IGNORED
-    namespace detail {
+namespace detail {
 
 /** Returns string of cv::Mat depth value: CV_8U -> "CV_8U" or NULL */
-        CV_EXPORTS const char *depthToString_(int depth);
+CV_EXPORTS const char* depthToString_(int depth);
 
 /** Returns string of cv::Mat depth value: CV_8UC3 -> "CV_8UC3" or cv::String() */
-        CV_EXPORTS const cv::String typeToString_(int type);
+CV_EXPORTS const cv::String typeToString_(int type);
 
-        enum TestOp {
-            TEST_CUSTOM = 0,
-            TEST_EQ = 1,
-            TEST_NE = 2,
-            TEST_LE = 3,
-            TEST_LT = 4,
-            TEST_GE = 5,
-            TEST_GT = 6,
-            CV__LAST_TEST_OP
-        };
+enum TestOp {
+  TEST_CUSTOM = 0,
+  TEST_EQ = 1,
+  TEST_NE = 2,
+  TEST_LE = 3,
+  TEST_LT = 4,
+  TEST_GE = 5,
+  TEST_GT = 6,
+  CV__LAST_TEST_OP
+};
 
-        struct CheckContext {
-            const char *func;
-            const char *file;
-            int line;
-            enum TestOp testOp;
-            const char *message;
-            const char *p1_str;
-            const char *p2_str;
-        };
+struct CheckContext {
+    const char* func;
+    const char* file;
+    int line;
+    enum TestOp testOp;
+    const char* message;
+    const char* p1_str;
+    const char* p2_str;
+};
 
 #ifndef CV__CHECK_FILENAME
 # define CV__CHECK_FILENAME __FILE__
@@ -65,45 +65,23 @@ namespace cv {
     static const cv::detail::CheckContext CV__CHECK_LOCATION_VARNAME(id) = \
             { CV__CHECK_FUNCTION, CV__CHECK_FILENAME, __LINE__, testOp, message, p1_str, p2_str }
 
-        CV_EXPORTS void CV_NORETURN
-        check_failed_auto(const int v1, const int v2, const CheckContext &ctx);
+CV_EXPORTS void CV_NORETURN check_failed_auto(const int v1, const int v2, const CheckContext& ctx);
+CV_EXPORTS void CV_NORETURN check_failed_auto(const size_t v1, const size_t v2, const CheckContext& ctx);
+CV_EXPORTS void CV_NORETURN check_failed_auto(const float v1, const float v2, const CheckContext& ctx);
+CV_EXPORTS void CV_NORETURN check_failed_auto(const double v1, const double v2, const CheckContext& ctx);
+CV_EXPORTS void CV_NORETURN check_failed_auto(const Size_<int> v1, const Size_<int> v2, const CheckContext& ctx);
+CV_EXPORTS void CV_NORETURN check_failed_MatDepth(const int v1, const int v2, const CheckContext& ctx);
+CV_EXPORTS void CV_NORETURN check_failed_MatType(const int v1, const int v2, const CheckContext& ctx);
+CV_EXPORTS void CV_NORETURN check_failed_MatChannels(const int v1, const int v2, const CheckContext& ctx);
 
-        CV_EXPORTS void CV_NORETURN
-        check_failed_auto(const size_t v1, const size_t v2, const CheckContext &ctx);
-
-        CV_EXPORTS void CV_NORETURN
-        check_failed_auto(const float v1, const float v2, const CheckContext &ctx);
-
-        CV_EXPORTS void CV_NORETURN
-        check_failed_auto(const double v1, const double v2, const CheckContext &ctx);
-
-        CV_EXPORTS void CV_NORETURN
-        check_failed_auto(const Size_<int> v1, const Size_<int> v2, const CheckContext &ctx);
-
-        CV_EXPORTS void CV_NORETURN
-        check_failed_MatDepth(const int v1, const int v2, const CheckContext &ctx);
-
-        CV_EXPORTS void CV_NORETURN
-        check_failed_MatType(const int v1, const int v2, const CheckContext &ctx);
-
-        CV_EXPORTS void CV_NORETURN
-        check_failed_MatChannels(const int v1, const int v2, const CheckContext &ctx);
-
-        CV_EXPORTS void CV_NORETURN check_failed_auto(const int v, const CheckContext &ctx);
-
-        CV_EXPORTS void CV_NORETURN check_failed_auto(const size_t v, const CheckContext &ctx);
-
-        CV_EXPORTS void CV_NORETURN check_failed_auto(const float v, const CheckContext &ctx);
-
-        CV_EXPORTS void CV_NORETURN check_failed_auto(const double v, const CheckContext &ctx);
-
-        CV_EXPORTS void CV_NORETURN check_failed_auto(const Size_<int> v, const CheckContext &ctx);
-
-        CV_EXPORTS void CV_NORETURN check_failed_MatDepth(const int v, const CheckContext &ctx);
-
-        CV_EXPORTS void CV_NORETURN check_failed_MatType(const int v, const CheckContext &ctx);
-
-        CV_EXPORTS void CV_NORETURN check_failed_MatChannels(const int v, const CheckContext &ctx);
+CV_EXPORTS void CV_NORETURN check_failed_auto(const int v, const CheckContext& ctx);
+CV_EXPORTS void CV_NORETURN check_failed_auto(const size_t v, const CheckContext& ctx);
+CV_EXPORTS void CV_NORETURN check_failed_auto(const float v, const CheckContext& ctx);
+CV_EXPORTS void CV_NORETURN check_failed_auto(const double v, const CheckContext& ctx);
+CV_EXPORTS void CV_NORETURN check_failed_auto(const Size_<int> v, const CheckContext& ctx);
+CV_EXPORTS void CV_NORETURN check_failed_MatDepth(const int v, const CheckContext& ctx);
+CV_EXPORTS void CV_NORETURN check_failed_MatType(const int v, const CheckContext& ctx);
+CV_EXPORTS void CV_NORETURN check_failed_MatChannels(const int v, const CheckContext& ctx);
 
 
 #define CV__TEST_EQ(v1, v2) ((v1) == (v2))
@@ -127,7 +105,7 @@ namespace cv {
     } \
 } while (0)
 
-    } // namespace
+} // namespace
 //! @endcond
 
 

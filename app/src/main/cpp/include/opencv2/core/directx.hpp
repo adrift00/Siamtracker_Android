@@ -62,11 +62,10 @@ struct IDirect3DSurface9;
 #endif
 
 
-namespace cv {
-    namespace directx {
+namespace cv { namespace directx {
 
-        namespace ocl {
-            using namespace cv::ocl;
+namespace ocl {
+using namespace cv::ocl;
 
 //! @addtogroup core_directx
 // This section describes OpenCL and DirectX interoperability.
@@ -83,41 +82,29 @@ namespace cv {
 //
 //! @param pD3D11Device - pointer to D3D11 device
 //! @return Returns reference to OpenCL Context
-            CV_EXPORTS Context
-            &
-            initializeContextFromD3D11Device(ID3D11Device
-            * pD3D11Device);
+CV_EXPORTS Context& initializeContextFromD3D11Device(ID3D11Device* pD3D11Device);
 
 //! @brief Creates OpenCL context from D3D10 device
 //
 //! @param pD3D10Device - pointer to D3D10 device
 //! @return Returns reference to OpenCL Context
-            CV_EXPORTS Context
-            &
-            initializeContextFromD3D10Device(ID3D10Device
-            * pD3D10Device);
+CV_EXPORTS Context& initializeContextFromD3D10Device(ID3D10Device* pD3D10Device);
 
 //! @brief Creates OpenCL context from Direct3DDevice9Ex device
 //
 //! @param pDirect3DDevice9Ex - pointer to Direct3DDevice9Ex device
 //! @return Returns reference to OpenCL Context
-            CV_EXPORTS Context
-            &
-            initializeContextFromDirect3DDevice9Ex(IDirect3DDevice9Ex
-            * pDirect3DDevice9Ex);
+CV_EXPORTS Context& initializeContextFromDirect3DDevice9Ex(IDirect3DDevice9Ex* pDirect3DDevice9Ex);
 
 //! @brief Creates OpenCL context from Direct3DDevice9 device
 //
 //! @param pDirect3DDevice9 - pointer to Direct3Device9 device
 //! @return Returns reference to OpenCL Context
-            CV_EXPORTS Context
-            &
-            initializeContextFromDirect3DDevice9(IDirect3DDevice9
-            * pDirect3DDevice9);
+CV_EXPORTS Context& initializeContextFromDirect3DDevice9(IDirect3DDevice9* pDirect3DDevice9);
 
 //! @}
 
-        } // namespace cv::directx::ocl
+} // namespace cv::directx::ocl
 
 //! @addtogroup core_directx
 //! @{
@@ -130,10 +117,7 @@ namespace cv {
 //
 //! @param src - source InputArray
 //! @param pD3D11Texture2D - destination D3D11 texture
-        CV_EXPORTS void convertToD3D11Texture2D(InputArray
-        src,
-        ID3D11Texture2D *pD3D11Texture2D
-        );
+CV_EXPORTS void convertToD3D11Texture2D(InputArray src, ID3D11Texture2D* pD3D11Texture2D);
 
 //! @brief Converts ID3D11Texture2D to OutputArray. If input texture format is DXGI_FORMAT_NV12 then
 //!        data will be upsampled and color-converted to BGR format.
@@ -143,8 +127,7 @@ namespace cv {
 //
 //! @param pD3D11Texture2D - source D3D11 texture
 //! @param dst             - destination OutputArray
-        CV_EXPORTS void
-        convertFromD3D11Texture2D(ID3D11Texture2D *pD3D11Texture2D, OutputArray dst);
+CV_EXPORTS void convertFromD3D11Texture2D(ID3D11Texture2D* pD3D11Texture2D, OutputArray dst);
 
 //! @brief Converts InputArray to ID3D10Texture2D
 //
@@ -153,10 +136,7 @@ namespace cv {
 //
 //! @param src             - source InputArray
 //! @param pD3D10Texture2D - destination D3D10 texture
-        CV_EXPORTS void convertToD3D10Texture2D(InputArray
-        src,
-        ID3D10Texture2D *pD3D10Texture2D
-        );
+CV_EXPORTS void convertToD3D10Texture2D(InputArray src, ID3D10Texture2D* pD3D10Texture2D);
 
 //! @brief Converts ID3D10Texture2D to OutputArray
 //
@@ -165,8 +145,7 @@ namespace cv {
 //
 //! @param pD3D10Texture2D - source D3D10 texture
 //! @param dst             - destination OutputArray
-        CV_EXPORTS void
-        convertFromD3D10Texture2D(ID3D10Texture2D *pD3D10Texture2D, OutputArray dst);
+CV_EXPORTS void convertFromD3D10Texture2D(ID3D10Texture2D* pD3D10Texture2D, OutputArray dst);
 
 //! @brief Converts InputArray to IDirect3DSurface9
 //
@@ -176,11 +155,7 @@ namespace cv {
 //! @param src                 - source InputArray
 //! @param pDirect3DSurface9   - destination D3D10 texture
 //! @param surfaceSharedHandle - shared handle
-        CV_EXPORTS void convertToDirect3DSurface9(InputArray
-        src,
-        IDirect3DSurface9 *pDirect3DSurface9,
-        void *surfaceSharedHandle = NULL
-        );
+CV_EXPORTS void convertToDirect3DSurface9(InputArray src, IDirect3DSurface9* pDirect3DSurface9, void* surfaceSharedHandle = NULL);
 
 //! @brief Converts IDirect3DSurface9 to OutputArray
 //
@@ -190,24 +165,20 @@ namespace cv {
 //! @param pDirect3DSurface9   - source D3D10 texture
 //! @param dst                 - destination OutputArray
 //! @param surfaceSharedHandle - shared handle
-        CV_EXPORTS void
-        convertFromDirect3DSurface9(IDirect3DSurface9 *pDirect3DSurface9, OutputArray dst,
-                                    void *surfaceSharedHandle = NULL);
+CV_EXPORTS void convertFromDirect3DSurface9(IDirect3DSurface9* pDirect3DSurface9, OutputArray dst, void* surfaceSharedHandle = NULL);
 
 //! @brief Get OpenCV type from DirectX type
 //! @param iDXGI_FORMAT - enum DXGI_FORMAT for D3D10/D3D11
 //! @return OpenCV type or -1 if there is no equivalent
-        CV_EXPORTS int
-        getTypeFromDXGI_FORMAT(const int iDXGI_FORMAT); // enum DXGI_FORMAT for D3D10/D3D11
+CV_EXPORTS int getTypeFromDXGI_FORMAT(const int iDXGI_FORMAT); // enum DXGI_FORMAT for D3D10/D3D11
 
 //! @brief Get OpenCV type from DirectX type
 //! @param iD3DFORMAT - enum D3DTYPE for D3D9
 //! @return OpenCV type or -1 if there is no equivalent
-        CV_EXPORTS int getTypeFromD3DFORMAT(const int iD3DFORMAT); // enum D3DTYPE for D3D9
+CV_EXPORTS int getTypeFromD3DFORMAT(const int iD3DFORMAT); // enum D3DTYPE for D3D9
 
 //! @}
 
-    }
-} // namespace cv::directx
+} } // namespace cv::directx
 
 #endif // OPENCV_CORE_DIRECTX_HPP

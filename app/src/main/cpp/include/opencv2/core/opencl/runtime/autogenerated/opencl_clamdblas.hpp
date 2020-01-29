@@ -544,30 +544,7 @@
 //extern CL_RUNTIME_EXPORT clAmdBlasStatus (*clAmdBlasCdotu)(size_t N, cl_mem dotProduct, size_t offDP, const cl_mem X, size_t offx, int incx, const cl_mem Y, size_t offy, int incy, cl_mem scratchBuff, cl_uint numCommandQueues, cl_command_queue* commandQueues, cl_uint numEventsInWaitList, const cl_event* eventWaitList, cl_event* events);
 //extern CL_RUNTIME_EXPORT clAmdBlasStatus (*clAmdBlasCgbmv)(clAmdBlasOrder order, clAmdBlasTranspose trans, size_t M, size_t N, size_t KL, size_t KU, cl_float2 alpha, const cl_mem A, size_t offa, size_t lda, const cl_mem X, size_t offx, int incx, cl_float2 beta, cl_mem Y, size_t offy, int incy, cl_uint numCommandQueues, cl_command_queue* commandQueues, cl_uint numEventsInWaitList, const cl_event* eventWaitList, cl_event* events);
 //extern CL_RUNTIME_EXPORT clAmdBlasStatus (*clAmdBlasCgemm)(clAmdBlasOrder order, clAmdBlasTranspose transA, clAmdBlasTranspose transB, size_t M, size_t N, size_t K, FloatComplex alpha, const cl_mem A, size_t lda, const cl_mem B, size_t ldb, FloatComplex beta, cl_mem C, size_t ldc, cl_uint numCommandQueues, cl_command_queue* commandQueues, cl_uint numEventsInWaitList, const cl_event* eventWaitList, cl_event* events);
-extern CL_RUNTIME_EXPORT clAmdBlasStatus(*clAmdBlasCgemmEx)
-(
-clAmdBlasOrder order, clAmdBlasTranspose
-transA,
-clAmdBlasTranspose transB, size_t
-M,
-size_t N, size_t
-K,
-FloatComplex alpha,
-const cl_mem A, size_t
-offA,
-size_t lda,
-const cl_mem B, size_t
-offB,
-size_t ldb, FloatComplex
-beta,
-cl_mem C, size_t
-offC,
-size_t ldc, cl_uint
-numCommandQueues,
-cl_command_queue *commandQueues, cl_uint
-numEventsInWaitList,
-const cl_event *eventWaitList, cl_event
-* events);
+extern CL_RUNTIME_EXPORT clAmdBlasStatus (*clAmdBlasCgemmEx)(clAmdBlasOrder order, clAmdBlasTranspose transA, clAmdBlasTranspose transB, size_t M, size_t N, size_t K, FloatComplex alpha, const cl_mem A, size_t offA, size_t lda, const cl_mem B, size_t offB, size_t ldb, FloatComplex beta, cl_mem C, size_t offC, size_t ldc, cl_uint numCommandQueues, cl_command_queue* commandQueues, cl_uint numEventsInWaitList, const cl_event* eventWaitList, cl_event* events);
 //extern CL_RUNTIME_EXPORT clAmdBlasStatus (*clAmdBlasCgemv)(clAmdBlasOrder order, clAmdBlasTranspose transA, size_t M, size_t N, FloatComplex alpha, const cl_mem A, size_t lda, const cl_mem x, size_t offx, int incx, FloatComplex beta, cl_mem y, size_t offy, int incy, cl_uint numCommandQueues, cl_command_queue* commandQueues, cl_uint numEventsInWaitList, const cl_event* eventWaitList, cl_event* events);
 //extern CL_RUNTIME_EXPORT clAmdBlasStatus (*clAmdBlasCgemvEx)(clAmdBlasOrder order, clAmdBlasTranspose transA, size_t M, size_t N, FloatComplex alpha, const cl_mem A, size_t offA, size_t lda, const cl_mem x, size_t offx, int incx, FloatComplex beta, cl_mem y, size_t offy, int incy, cl_uint numCommandQueues, cl_command_queue* commandQueues, cl_uint numEventsInWaitList, const cl_event* eventWaitList, cl_event* events);
 //extern CL_RUNTIME_EXPORT clAmdBlasStatus (*clAmdBlasCgerc)(clAmdBlasOrder order, size_t M, size_t N, cl_float2 alpha, const cl_mem X, size_t offx, int incx, const cl_mem Y, size_t offy, int incy, cl_mem A, size_t offa, size_t lda, cl_uint numCommandQueues, cl_command_queue* commandQueues, cl_uint numEventsInWaitList, const cl_event* eventWaitList, cl_event* events);
@@ -608,30 +585,7 @@ const cl_event *eventWaitList, cl_event
 //extern CL_RUNTIME_EXPORT clAmdBlasStatus (*clAmdBlasDdot)(size_t N, cl_mem dotProduct, size_t offDP, const cl_mem X, size_t offx, int incx, const cl_mem Y, size_t offy, int incy, cl_mem scratchBuff, cl_uint numCommandQueues, cl_command_queue* commandQueues, cl_uint numEventsInWaitList, const cl_event* eventWaitList, cl_event* events);
 //extern CL_RUNTIME_EXPORT clAmdBlasStatus (*clAmdBlasDgbmv)(clAmdBlasOrder order, clAmdBlasTranspose trans, size_t M, size_t N, size_t KL, size_t KU, cl_double alpha, const cl_mem A, size_t offa, size_t lda, const cl_mem X, size_t offx, int incx, cl_double beta, cl_mem Y, size_t offy, int incy, cl_uint numCommandQueues, cl_command_queue* commandQueues, cl_uint numEventsInWaitList, const cl_event* eventWaitList, cl_event* events);
 //extern CL_RUNTIME_EXPORT clAmdBlasStatus (*clAmdBlasDgemm)(clAmdBlasOrder order, clAmdBlasTranspose transA, clAmdBlasTranspose transB, size_t M, size_t N, size_t K, cl_double alpha, const cl_mem A, size_t lda, const cl_mem B, size_t ldb, cl_double beta, cl_mem C, size_t ldc, cl_uint numCommandQueues, cl_command_queue* commandQueues, cl_uint numEventsInWaitList, const cl_event* eventWaitList, cl_event* events);
-extern CL_RUNTIME_EXPORT clAmdBlasStatus(*clAmdBlasDgemmEx)
-(
-clAmdBlasOrder order, clAmdBlasTranspose
-transA,
-clAmdBlasTranspose transB, size_t
-M,
-size_t N, size_t
-K,
-cl_double alpha,
-const cl_mem A, size_t
-offA,
-size_t lda,
-const cl_mem B, size_t
-offB,
-size_t ldb, cl_double
-beta,
-cl_mem C, size_t
-offC,
-size_t ldc, cl_uint
-numCommandQueues,
-cl_command_queue *commandQueues, cl_uint
-numEventsInWaitList,
-const cl_event *eventWaitList, cl_event
-* events);
+extern CL_RUNTIME_EXPORT clAmdBlasStatus (*clAmdBlasDgemmEx)(clAmdBlasOrder order, clAmdBlasTranspose transA, clAmdBlasTranspose transB, size_t M, size_t N, size_t K, cl_double alpha, const cl_mem A, size_t offA, size_t lda, const cl_mem B, size_t offB, size_t ldb, cl_double beta, cl_mem C, size_t offC, size_t ldc, cl_uint numCommandQueues, cl_command_queue* commandQueues, cl_uint numEventsInWaitList, const cl_event* eventWaitList, cl_event* events);
 //extern CL_RUNTIME_EXPORT clAmdBlasStatus (*clAmdBlasDgemv)(clAmdBlasOrder order, clAmdBlasTranspose transA, size_t M, size_t N, cl_double alpha, const cl_mem A, size_t lda, const cl_mem x, size_t offx, int incx, cl_double beta, cl_mem y, size_t offy, int incy, cl_uint numCommandQueues, cl_command_queue* commandQueues, cl_uint numEventsInWaitList, const cl_event* eventWaitList, cl_event* events);
 //extern CL_RUNTIME_EXPORT clAmdBlasStatus (*clAmdBlasDgemvEx)(clAmdBlasOrder order, clAmdBlasTranspose transA, size_t M, size_t N, cl_double alpha, const cl_mem A, size_t offA, size_t lda, const cl_mem x, size_t offx, int incx, cl_double beta, cl_mem y, size_t offy, int incy, cl_uint numCommandQueues, cl_command_queue* commandQueues, cl_uint numEventsInWaitList, const cl_event* eventWaitList, cl_event* events);
 //extern CL_RUNTIME_EXPORT clAmdBlasStatus (*clAmdBlasDger)(clAmdBlasOrder order, size_t M, size_t N, cl_double alpha, const cl_mem X, size_t offx, int incx, const cl_mem Y, size_t offy, int incy, cl_mem A, size_t offa, size_t lda, cl_uint numCommandQueues, cl_command_queue* commandQueues, cl_uint numEventsInWaitList, const cl_event* eventWaitList, cl_event* events);
@@ -675,35 +629,10 @@ const cl_event *eventWaitList, cl_event
 //extern CL_RUNTIME_EXPORT clAmdBlasStatus (*clAmdBlasScnrm2)(size_t N, cl_mem NRM2, size_t offNRM2, const cl_mem X, size_t offx, int incx, cl_mem scratchBuff, cl_uint numCommandQueues, cl_command_queue* commandQueues, cl_uint numEventsInWaitList, const cl_event* eventWaitList, cl_event* events);
 //extern CL_RUNTIME_EXPORT clAmdBlasStatus (*clAmdBlasScopy)(size_t N, const cl_mem X, size_t offx, int incx, cl_mem Y, size_t offy, int incy, cl_uint numCommandQueues, cl_command_queue* commandQueues, cl_uint numEventsInWaitList, const cl_event* eventWaitList, cl_event* events);
 //extern CL_RUNTIME_EXPORT clAmdBlasStatus (*clAmdBlasSdot)(size_t N, cl_mem dotProduct, size_t offDP, const cl_mem X, size_t offx, int incx, const cl_mem Y, size_t offy, int incy, cl_mem scratchBuff, cl_uint numCommandQueues, cl_command_queue* commandQueues, cl_uint numEventsInWaitList, const cl_event* eventWaitList, cl_event* events);
-extern CL_RUNTIME_EXPORT clAmdBlasStatus(*clAmdBlasSetup)
-();
+extern CL_RUNTIME_EXPORT clAmdBlasStatus (*clAmdBlasSetup)();
 //extern CL_RUNTIME_EXPORT clAmdBlasStatus (*clAmdBlasSgbmv)(clAmdBlasOrder order, clAmdBlasTranspose trans, size_t M, size_t N, size_t KL, size_t KU, cl_float alpha, const cl_mem A, size_t offa, size_t lda, const cl_mem X, size_t offx, int incx, cl_float beta, cl_mem Y, size_t offy, int incy, cl_uint numCommandQueues, cl_command_queue* commandQueues, cl_uint numEventsInWaitList, const cl_event* eventWaitList, cl_event* events);
 //extern CL_RUNTIME_EXPORT clAmdBlasStatus (*clAmdBlasSgemm)(clAmdBlasOrder order, clAmdBlasTranspose transA, clAmdBlasTranspose transB, size_t M, size_t N, size_t K, cl_float alpha, const cl_mem A, size_t lda, const cl_mem B, size_t ldb, cl_float beta, cl_mem C, size_t ldc, cl_uint numCommandQueues, cl_command_queue* commandQueues, cl_uint numEventsInWaitList, const cl_event* eventWaitList, cl_event* events);
-extern CL_RUNTIME_EXPORT clAmdBlasStatus(*clAmdBlasSgemmEx)
-(
-clAmdBlasOrder order, clAmdBlasTranspose
-transA,
-clAmdBlasTranspose transB, size_t
-M,
-size_t N, size_t
-K,
-cl_float alpha,
-const cl_mem A, size_t
-offA,
-size_t lda,
-const cl_mem B, size_t
-offB,
-size_t ldb, cl_float
-beta,
-cl_mem C, size_t
-offC,
-size_t ldc, cl_uint
-numCommandQueues,
-cl_command_queue *commandQueues, cl_uint
-numEventsInWaitList,
-const cl_event *eventWaitList, cl_event
-* events);
-
+extern CL_RUNTIME_EXPORT clAmdBlasStatus (*clAmdBlasSgemmEx)(clAmdBlasOrder order, clAmdBlasTranspose transA, clAmdBlasTranspose transB, size_t M, size_t N, size_t K, cl_float alpha, const cl_mem A, size_t offA, size_t lda, const cl_mem B, size_t offB, size_t ldb, cl_float beta, cl_mem C, size_t offC, size_t ldc, cl_uint numCommandQueues, cl_command_queue* commandQueues, cl_uint numEventsInWaitList, const cl_event* eventWaitList, cl_event* events);
 //extern CL_RUNTIME_EXPORT clAmdBlasStatus (*clAmdBlasSgemv)(clAmdBlasOrder order, clAmdBlasTranspose transA, size_t M, size_t N, cl_float alpha, const cl_mem A, size_t lda, const cl_mem x, size_t offx, int incx, cl_float beta, cl_mem y, size_t offy, int incy, cl_uint numCommandQueues, cl_command_queue* commandQueues, cl_uint numEventsInWaitList, const cl_event* eventWaitList, cl_event* events);
 //extern CL_RUNTIME_EXPORT clAmdBlasStatus (*clAmdBlasSgemvEx)(clAmdBlasOrder order, clAmdBlasTranspose transA, size_t M, size_t N, cl_float alpha, const cl_mem A, size_t offA, size_t lda, const cl_mem x, size_t offx, int incx, cl_float beta, cl_mem y, size_t offy, int incy, cl_uint numCommandQueues, cl_command_queue* commandQueues, cl_uint numEventsInWaitList, const cl_event* eventWaitList, cl_event* events);
 //extern CL_RUNTIME_EXPORT clAmdBlasStatus (*clAmdBlasSger)(clAmdBlasOrder order, size_t M, size_t N, cl_float alpha, const cl_mem X, size_t offx, int incx, const cl_mem Y, size_t offy, int incy, cl_mem A, size_t offa, size_t lda, cl_uint numCommandQueues, cl_command_queue* commandQueues, cl_uint numEventsInWaitList, const cl_event* eventWaitList, cl_event* events);
@@ -738,7 +667,6 @@ const cl_event *eventWaitList, cl_event
 //extern CL_RUNTIME_EXPORT clAmdBlasStatus (*clAmdBlasStrsmEx)(clAmdBlasOrder order, clAmdBlasSide side, clAmdBlasUplo uplo, clAmdBlasTranspose transA, clAmdBlasDiag diag, size_t M, size_t N, cl_float alpha, const cl_mem A, size_t offA, size_t lda, cl_mem B, size_t offB, size_t ldb, cl_uint numCommandQueues, cl_command_queue* commandQueues, cl_uint numEventsInWaitList, const cl_event* eventWaitList, cl_event* events);
 //extern CL_RUNTIME_EXPORT clAmdBlasStatus (*clAmdBlasStrsv)(clAmdBlasOrder order, clAmdBlasUplo uplo, clAmdBlasTranspose trans, clAmdBlasDiag diag, size_t N, const cl_mem A, size_t offa, size_t lda, cl_mem X, size_t offx, int incx, cl_uint numCommandQueues, cl_command_queue* commandQueues, cl_uint numEventsInWaitList, const cl_event* eventWaitList, cl_event* events);
 extern CL_RUNTIME_EXPORT void (*clAmdBlasTeardown)();
-
 //extern CL_RUNTIME_EXPORT clAmdBlasStatus (*clAmdBlasZaxpy)(size_t N, cl_double2 alpha, const cl_mem X, size_t offx, int incx, cl_mem Y, size_t offy, int incy, cl_uint numCommandQueues, cl_command_queue* commandQueues, cl_uint numEventsInWaitList, const cl_event* eventWaitList, cl_event* events);
 //extern CL_RUNTIME_EXPORT clAmdBlasStatus (*clAmdBlasZcopy)(size_t N, const cl_mem X, size_t offx, int incx, cl_mem Y, size_t offy, int incy, cl_uint numCommandQueues, cl_command_queue* commandQueues, cl_uint numEventsInWaitList, const cl_event* eventWaitList, cl_event* events);
 //extern CL_RUNTIME_EXPORT clAmdBlasStatus (*clAmdBlasZdotc)(size_t N, cl_mem dotProduct, size_t offDP, const cl_mem X, size_t offx, int incx, const cl_mem Y, size_t offy, int incy, cl_mem scratchBuff, cl_uint numCommandQueues, cl_command_queue* commandQueues, cl_uint numEventsInWaitList, const cl_event* eventWaitList, cl_event* events);
@@ -747,30 +675,7 @@ extern CL_RUNTIME_EXPORT void (*clAmdBlasTeardown)();
 //extern CL_RUNTIME_EXPORT clAmdBlasStatus (*clAmdBlasZdscal)(size_t N, cl_double alpha, cl_mem X, size_t offx, int incx, cl_uint numCommandQueues, cl_command_queue* commandQueues, cl_uint numEventsInWaitList, const cl_event* eventWaitList, cl_event* events);
 //extern CL_RUNTIME_EXPORT clAmdBlasStatus (*clAmdBlasZgbmv)(clAmdBlasOrder order, clAmdBlasTranspose trans, size_t M, size_t N, size_t KL, size_t KU, cl_double2 alpha, const cl_mem A, size_t offa, size_t lda, const cl_mem X, size_t offx, int incx, cl_double2 beta, cl_mem Y, size_t offy, int incy, cl_uint numCommandQueues, cl_command_queue* commandQueues, cl_uint numEventsInWaitList, const cl_event* eventWaitList, cl_event* events);
 //extern CL_RUNTIME_EXPORT clAmdBlasStatus (*clAmdBlasZgemm)(clAmdBlasOrder order, clAmdBlasTranspose transA, clAmdBlasTranspose transB, size_t M, size_t N, size_t K, DoubleComplex alpha, const cl_mem A, size_t lda, const cl_mem B, size_t ldb, DoubleComplex beta, cl_mem C, size_t ldc, cl_uint numCommandQueues, cl_command_queue* commandQueues, cl_uint numEventsInWaitList, const cl_event* eventWaitList, cl_event* events);
-extern CL_RUNTIME_EXPORT clAmdBlasStatus(*clAmdBlasZgemmEx)
-(
-clAmdBlasOrder order, clAmdBlasTranspose
-transA,
-clAmdBlasTranspose transB, size_t
-M,
-size_t N, size_t
-K,
-DoubleComplex alpha,
-const cl_mem A, size_t
-offA,
-size_t lda,
-const cl_mem B, size_t
-offB,
-size_t ldb, DoubleComplex
-beta,
-cl_mem C, size_t
-offC,
-size_t ldc, cl_uint
-numCommandQueues,
-cl_command_queue *commandQueues, cl_uint
-numEventsInWaitList,
-const cl_event *eventWaitList, cl_event
-* events);
+extern CL_RUNTIME_EXPORT clAmdBlasStatus (*clAmdBlasZgemmEx)(clAmdBlasOrder order, clAmdBlasTranspose transA, clAmdBlasTranspose transB, size_t M, size_t N, size_t K, DoubleComplex alpha, const cl_mem A, size_t offA, size_t lda, const cl_mem B, size_t offB, size_t ldb, DoubleComplex beta, cl_mem C, size_t offC, size_t ldc, cl_uint numCommandQueues, cl_command_queue* commandQueues, cl_uint numEventsInWaitList, const cl_event* eventWaitList, cl_event* events);
 //extern CL_RUNTIME_EXPORT clAmdBlasStatus (*clAmdBlasZgemv)(clAmdBlasOrder order, clAmdBlasTranspose transA, size_t M, size_t N, DoubleComplex alpha, const cl_mem A, size_t lda, const cl_mem x, size_t offx, int incx, DoubleComplex beta, cl_mem y, size_t offy, int incy, cl_uint numCommandQueues, cl_command_queue* commandQueues, cl_uint numEventsInWaitList, const cl_event* eventWaitList, cl_event* events);
 //extern CL_RUNTIME_EXPORT clAmdBlasStatus (*clAmdBlasZgemvEx)(clAmdBlasOrder order, clAmdBlasTranspose transA, size_t M, size_t N, DoubleComplex alpha, const cl_mem A, size_t offA, size_t lda, const cl_mem x, size_t offx, int incx, DoubleComplex beta, cl_mem y, size_t offy, int incy, cl_uint numCommandQueues, cl_command_queue* commandQueues, cl_uint numEventsInWaitList, const cl_event* eventWaitList, cl_event* events);
 //extern CL_RUNTIME_EXPORT clAmdBlasStatus (*clAmdBlasZgerc)(clAmdBlasOrder order, size_t M, size_t N, cl_double2 alpha, const cl_mem X, size_t offx, int incx, const cl_mem Y, size_t offy, int incy, cl_mem A, size_t offa, size_t lda, cl_uint numCommandQueues, cl_command_queue* commandQueues, cl_uint numEventsInWaitList, const cl_event* eventWaitList, cl_event* events);
