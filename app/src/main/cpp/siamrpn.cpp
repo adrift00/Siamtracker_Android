@@ -60,6 +60,8 @@ void SiamRPN_MNN::init(cv::Mat img, Rect bbox) {
     //cv::Mat examplar_8u = cv::imread("E:\\BIP LAB\\siamtracker\\dataset\\examplar.jpg");
     cv::Mat examplar;
     examplar_8u.convertTo(examplar, CV_32F);
+    cv::imwrite("/storage/emulated/0/examplar_8u.jpg",examplar_8u);
+
 
     //wrap for input tensor
     MNN::Tensor *nhwc_tensor = MNN::Tensor::create<float>(
@@ -83,8 +85,6 @@ void SiamRPN_MNN::init(cv::Mat img, Rect bbox) {
     bbox_size_ = bbox_size;
 }
 
-#pragma optimize("", off)
-
 Rect SiamRPN_MNN::track(cv::Mat img) {
     int sz = size_z(bbox_size_);
     float scale_z = cfg.EXAMPLAR_SIZE / float(sz);
@@ -94,6 +94,7 @@ Rect SiamRPN_MNN::track(cv::Mat img) {
     //cv::Mat search_8u = cv::imread("E:\\BIP LAB\\siamtracker\\dataset\\search.png");
     cv::Mat search;
 
+    cv::imwrite("/storage/emulated/0/search_8u.jpg",search_8u);
     search_8u.convertTo(search, CV_32F);
     MNN::Tensor *nhwc_tensor = MNN::Tensor::create<float>(
             std::vector<int>{1, cfg.INSTANCE_SIZE, cfg.INSTANCE_SIZE, 3}, nullptr,
@@ -178,8 +179,6 @@ Rect SiamRPN_MNN::track(cv::Mat img) {
     bbox_size_[1] = h;
     return best_bbox;
 }
-
-#pragma optimize("", on)
 
 int SiamRPN_MNN::size_z(std::vector<float> bbox_size) {
     float context_amount = 0.5;
