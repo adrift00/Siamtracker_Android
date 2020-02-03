@@ -32,16 +32,23 @@ Java_com_example_siamtracker_MainActivity_siamtrackerInit(
     cv::Mat init_img(height, width, CV_8UC3);
     cv::cvtColor(yuv_img, init_img, CV_YUV2BGR_NV12);
     cv::imwrite("/storage/emulated/0/examplar.jpg", init_img);
+    //debug
+//    init_img=cv::imread("/storage/emulated/0/siamtracker/00000001.jpg");
     Rect init_bbox;
     float *bbox = env->GetFloatArrayElements(bbox_, 0);
     init_bbox.cx = bbox[0];
     init_bbox.cy = bbox[1];
     init_bbox.w = bbox[2];
     init_bbox.h = bbox[3];
-    cv::Rect rect(bbox[0]-bbox[2]/2,bbox[1]-bbox[3]/2,bbox[2],bbox[3]);
-    cv::rectangle(init_img, rect, cv::Scalar(0, 0, 255),1, cv::LINE_8,0);
-    cv::imwrite("/storage/emulated/0/examplar_line.jpg",init_img);
+    //debug
+//    init_bbox.cx = 365.2075;
+//    init_bbox.cy = 194.595;
+//    init_bbox.w = 106.1308;
+//    init_bbox.h = 96.4144;
     tracker->init(init_img, init_bbox);
+    cv::Rect rect(bbox[0] - bbox[2] / 2, bbox[1] - bbox[3] / 2, bbox[2], bbox[3]);
+    cv::rectangle(init_img, rect, cv::Scalar(0, 0, 255), 1, cv::LINE_8, 0);
+    cv::imwrite("/storage/emulated/0/examplar_line.jpg", init_img);
 }
 extern "C" JNIEXPORT jfloatArray JNICALL
 Java_com_example_siamtracker_MainActivity_siamtrackerTrack(
@@ -57,6 +64,7 @@ Java_com_example_siamtracker_MainActivity_siamtrackerTrack(
     cv::Mat search_img(height, width, CV_8UC3);
     cv::cvtColor(yuv_img, search_img, CV_YUV2BGR_NV12);
     cv::imwrite("/storage/emulated/0/search.jpg", search_img);
+//    search_img=cv::imread("/storage/emulated/0/siamtracker/00000006.jpg");
     Rect bbox = tracker->track(search_img);
     float bbox_ptr[4] = {bbox.cx, bbox.cy, bbox.w, bbox.h};
     jfloatArray rect = env->NewFloatArray(4);

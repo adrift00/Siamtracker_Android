@@ -32,6 +32,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.util.Log;
+import android.util.Range;
 import android.util.Size;
 import android.util.SparseIntArray;
 import android.view.MotionEvent;
@@ -196,6 +197,8 @@ public class MainActivity extends AppCompatActivity {
         try {
             copyBigDataToSD("siamrpn_examplar.mnn");
             copyBigDataToSD("siamrpn_search.mnn");
+            copyBigDataToSD("00000001.jpg");
+            copyBigDataToSD("00000006.jpg");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -374,30 +377,55 @@ public class MainActivity extends AppCompatActivity {
                     return;
                 }
                 PREVIEW_RETURN_IMAGE_COUNT = 0;
-                mBackgroundHandler.post(new Runnable() {    // 在子线程执行，防止预览界面卡顿
-                    @Override
-                    public void run() {
-                        if (mStartInit) {
-                            //get byte data
-                            byte[] yuvBytes = yuv2byte(image);
-                            float[] initBbox = getInitBBox(mInitRect);
-                            siamtrackerInit(yuvBytes, image.getWidth(), image.getHeight(), initBbox);
-                            mStartTrack = true;
-                            mStartInit = false;
-                        }else if (mStartTrack) {
-                            byte[] yuvBytes = yuv2byte(image);
-                            float[] trackBBox = siamtrackerTrack(yuvBytes, image.getWidth(), image.getHeight());
-                            mTrackRect = getTrackBBox(trackBBox);
-                            clearDraw();
-                            mCanvas = mSurfaceHolder.lockCanvas();   // 得到surfaceView的画布
-                            mCanvas.drawRect(mTrackRect, mPaint);
-                            mSurfaceHolder.unlockCanvasAndPost(mCanvas);
-                        }
-                        image.close();   // 这里一定要close，不然预览会卡死
-                    }
-                });
+                if (mStartInit) {
+                    //get byte data
+                    byte[] yuvBytes = yuv2byte(image);
+                    Log.i(TAG, "onImageAvailable: origin init rect " + mInitRect.left + " " +
+                            mInitRect.top + " " + mInitRect.right + " " + mInitRect.bottom);
+                    float[] initBbox = getInitBBox(mInitRect);
+                    Log.i(TAG, "onImageAvailable: changed init rect" + initBbox[0] + " " +
+                            initBbox[1] + " " + initBbox[2] + " " + initBbox[3]);
+                    siamtrackerInit(yuvBytes, image.getWidth(), image.getHeight(), initBbox);
+                    mStartTrack = true;
+                    mStartInit = false;
+                } else if (mStartTrack) {
+                    byte[] yuvBytes = yuv2byte(image);
+                    float[] trackBBox = siamtrackerTrack(yuvBytes, image.getWidth(), image.getHeight());
+                    Log.i(TAG, "onImageAvailable: origin track rect " + trackBBox[0] + " " +
+                            trackBBox[1] + " " + trackBBox[2] + " " + trackBBox[3]);
+                    mTrackRect = getTrackBBox(trackBBox);
+                    Log.i(TAG, "onImageAvailable: changed track rect" + mTrackRect.left + " " +
+                            mTrackRect.top + " " + mTrackRect.right + " " + mTrackRect.bottom);
+                    clearDraw();
+                    mCanvas = mSurfaceHolder.lockCanvas();   // 得到surfaceView的画布
+                    mCanvas.drawRect(mTrackRect, mPaint);
+                    mSurfaceHolder.unlockCanvasAndPost(mCanvas);
+                }
+                image.close();   // 这里一定要close，不然预览会卡死
+//                mBackgroundHandler.post(new Runnable() {    // 在子线程执行，防止预览界面卡顿
+//                    @Override
+//                    public void run() {
+//                        if (mStartInit) {
+//                            //get byte data
+//                            byte[] yuvBytes = yuv2byte(image);
+//                            float[] initBbox = getInitBBox(mInitRect);
+//                            siamtrackerInit(yuvBytes, image.getWidth(), image.getHeight(), initBbox);
+//                            mStartTrack = true;
+//                            mStartInit = false;
+//                        }else if (mStartTrack) {
+//                            byte[] yuvBytes = yuv2byte(image);
+//                            float[] trackBBox = siamtrackerTrack(yuvBytes, image.getWidth(), image.getHeight());
+//                            mTrackRect = getTrackBBox(trackBBox);
+//                            clearDraw();
+//                            mCanvas = mSurfaceHolder.lockCanvas();   // 得到surfaceView的画布
+//                            mCanvas.drawRect(mTrackRect, mPaint);
+//                            mSurfaceHolder.unlockCanvasAndPost(mCanvas);
+//                        }
+//                        image.close();   // 这里一定要close，不然预览会卡死
+//                    }
+//                });
             }
-        }, mBackgroundHandler);
+        }, null);
     }
 
     // 选择sizeMap中大于并且最接近width和height的size
@@ -441,8 +469,37 @@ public class MainActivity extends AppCompatActivity {
         if (meteringRectangles != null && meteringRectangles.length > 0) {
             Log.d(TAG, "PreviewRequestBuilder: AF_REGIONS=" + meteringRectangles[0].getRect().toString());
         }
-        mPreviewRequestBuilder.set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_AUTO);
+        //自动对焦
+        mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
+        //设置自动曝光帧率范围
+        mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, getRange());
+//        mPreviewRequestBuilder.set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_AUTO);
         mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CaptureRequest.CONTROL_AF_TRIGGER_IDLE);
+    }
+
+    private Range<Integer> getRange() {
+        CameraManager manager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
+        CameraCharacteristics chars = null;
+        try {
+            chars = manager.getCameraCharacteristics(mCameraId);
+        } catch (CameraAccessException e) {
+            e.printStackTrace();
+        }
+        Range<Integer>[] ranges = chars.get(CameraCharacteristics.CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES);
+
+        Range<Integer> result = null;
+
+        for (Range<Integer> range : ranges) {
+            //帧率不能太低，大于10
+            if (range.getLower() < 10)
+                continue;
+            if (result == null)
+                result = range;
+                //FPS下限小于15，弱光时能保证足够曝光时间，提高亮度。range范围跨度越大越好，光源足够时FPS较高，预览更流畅，光源不够时FPS较低，亮度更好。
+            else if (range.getLower() <= 15 && (range.getUpper() - range.getLower()) > (result.getUpper() - result.getLower()))
+                result = range;
+        }
+        return result;
     }
 
     private void clearDraw() {
@@ -496,12 +553,12 @@ public class MainActivity extends AppCompatActivity {
         int height = image.getHeight();
         int rowStride = planes[0].getRowStride();
         byte[] yuvBytes = new byte[(int) (width * height * 1.5)];
-        int dstIdx = 0;
         //y
         ByteBuffer yBuffer = planes[0].getBuffer();
         byte[] yBytes = new byte[yBuffer.capacity()];
         yBuffer.get(yBytes);
         int srcIdx = 0;
+        int dstIdx = 0;
         for (int i = 0; i < height; i++) {
             System.arraycopy(yBytes, srcIdx, yuvBytes, dstIdx, width);
             dstIdx += width;

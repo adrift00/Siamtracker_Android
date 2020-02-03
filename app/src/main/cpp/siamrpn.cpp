@@ -173,10 +173,10 @@ Rect SiamRPN_MNN::track(cv::Mat img) {
     best_bbox.w = clip(w, 10, img.cols);
     best_bbox.h = clip(h, 10, img.rows);
     //update
-    bbox_pos_[0] = cx;
-    bbox_pos_[1] = cy;
-    bbox_size_[0] = w;
-    bbox_size_[1] = h;
+    bbox_pos_[0] = best_bbox.cx;
+    bbox_pos_[1] = best_bbox.cy;
+    bbox_size_[0] = best_bbox.w;
+    bbox_size_[1] = best_bbox.h;
     return best_bbox;
 }
 
