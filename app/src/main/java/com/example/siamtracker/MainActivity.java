@@ -195,10 +195,10 @@ public class MainActivity extends AppCompatActivity {
         verifyStoragePermissions(this);
         //copy to sd scard
         try {
-            copyBigDataToSD("siamrpn_examplar.mnn");
-            copyBigDataToSD("siamrpn_search.mnn");
-            copyBigDataToSD("00000001.jpg");
-            copyBigDataToSD("00000006.jpg");
+            copyBigDataToSD("siamrpn_mobi_examplar.mnn");
+            copyBigDataToSD("siamrpn_mobi_search.mnn");
+//            copyBigDataToSD("00000001.jpg");
+//            copyBigDataToSD("00000006.jpg");
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -2,108 +2,82 @@
 
 #define PI 3.1415926
 
-std::vector<float> hanning(int n) {
-    std::vector<float> window(n);
-    for (int i = 0; i < n; i++) {
-        window[i] = 0.5 - 0.5 * cos(2 * PI * i / (n - 1));
-    }
-    return window;
-}
-
-std::vector<std::vector<float>> outer(std::vector<float> vec1, std::vector<float> vec2) {
-    int n = vec1.size();
-    std::vector<std::vector<float>> mat(n, std::vector<float>(n));
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n; j++) {
-            mat[i][j] = vec1[i] * vec2[j];
-        }
-    }
-    return mat;
-}
-
-SiamRPN_MNN::SiamRPN_MNN(std::string model_dir) {
-    //TODO: INIT OR NOT
-    anchor_generator_.init(std::vector<float>{8}, std::vector<float>{0.33, 0.5, 1, 2, 3}, 8);
+SiamRPN_MNN::SiamRPN_MNN(std::string modelPath) {
+    anchor_generator_ = std::make_shared<AnchorGenerator>(std::vector<float>{8}, std::vector<float>{0.33, 0.5, 1, 2, 3},
+                                                          8);
     score_size_ = int((cfg.INSTANCE_SIZE - cfg.EXAMPLAR_SIZE) / cfg.STRIDE) + 1 + cfg.BASE_SIZE;
     std::vector<float> h = hanning(score_size_);
-    auto window = outer(h, h);
-    //TODO: 
-    for (int i = 0; i < window.size(); i++) {
-        for (int j = 0; j < window[0].size(); j++) {
-            window_.push_back(window[i][j]);
-        }
-    }
-    all_anchors_ = anchor_generator_.generate_all_anchors(int(cfg.INSTANCE_SIZE / 2), score_size_);
+    window_ = outer(h, h);
+    all_anchors_ = anchor_generator_->generate_all_anchors(int(cfg.INSTANCE_SIZE / 2), score_size_);
     //examplar
-    std::string examplar_path = model_dir + "siamrpn_examplar.mnn";
+    std::string examplar_path = modelPath + "siamrpn_mobi_examplar.mnn";
     exam_interp_ = MNN::Interpreter::createFromFile(examplar_path.c_str());
-    MNN::ScheduleConfig conf;
-    exam_sess_ = exam_interp_->createSession(conf);
+    MNN::ScheduleConfig cfg;
+    exam_sess_ = exam_interp_->createSession(cfg);
     exam_input_ = exam_interp_->getSessionInput(exam_sess_, nullptr);
     //search
-    MNN::ScheduleConfig search_cfg;
-    //search_cfg.saveTensors = { "145___tr4146","118___tr4133","132","95___tr4132","95","91","90" };
-//    search_cfg.saveTensors = {"92","90"};
-    std::string search_path = model_dir + "siamrpn_search.mnn";
+    std::string search_path = modelPath + "siamrpn_mobi_search.mnn";
     search_interp_ = MNN::Interpreter::createFromFile(search_path.c_str());
-    search_sess_ = search_interp_->createSession(search_cfg);
-    search_input_.push_back(search_interp_->getSessionInput(search_sess_, "examplar"));
+    search_sess_ = search_interp_->createSession(cfg);
+    search_input_.push_back(search_interp_->getSessionInput(search_sess_, "e0"));
+    search_input_.push_back(search_interp_->getSessionInput(search_sess_, "e1"));
+    search_input_.push_back(search_interp_->getSessionInput(search_sess_, "e2"));
     search_input_.push_back(search_interp_->getSessionInput(search_sess_, "search"));
 }
 
-void SiamRPN_MNN::init(cv::Mat img, Rect bbox) {
+void SiamRPN_MNN::init(cv::Mat &img, Rect bbox) {
     std::vector<float> bbox_pos{bbox.cx, bbox.cy};
     std::vector<float> bbox_size{bbox.w, bbox.h};
     float sz = size_z(bbox_size);
     channel_average_ = cv::mean(img);
-    cv::Mat examplar_8u = get_subwindows(img, bbox_pos, cfg.EXAMPLAR_SIZE, sz, channel_average_);
-    //cv::Mat examplar_8u = cv::imread("E:\\BIP LAB\\siamtracker\\dataset\\examplar.jpg");
+    cv::Mat examplar_8u = get_subwindows(img, bbox_pos, cfg.EXAMPLAR_SIZE, round(sz), channel_average_);
+    //cv::Mat examplar_8u = cv::imread("E:\\BIP LAB\\siamtracker\\dataset\\examplar.png");
     cv::Mat examplar;
     examplar_8u.convertTo(examplar, CV_32F);
-    cv::imwrite("/storage/emulated/0/examplar_8u.jpg",examplar_8u);
-
 
     //wrap for input tensor
-    MNN::Tensor *nhwc_tensor = MNN::Tensor::create<float>(
-            std::vector<int>{1, cfg.EXAMPLAR_SIZE, cfg.EXAMPLAR_SIZE, 3}, nullptr,
-            MNN::Tensor::TENSORFLOW);
+    MNN::Tensor *nhwc_tensor = MNN::Tensor::create<float>(std::vector<int>{1, cfg.EXAMPLAR_SIZE, cfg.EXAMPLAR_SIZE, 3},
+                                                          nullptr, MNN::Tensor::TENSORFLOW);
     float *nhwc_data = nhwc_tensor->host<float>();
     size_t nhwc_size = nhwc_tensor->size();
-    //TODO: ::
-    ::memcpy(nhwc_data, examplar.data, nhwc_size);
+    std::memcpy(nhwc_data, examplar.data, nhwc_size);
     exam_input_->copyFromHostTensor(nhwc_tensor);
     exam_interp_->runSession(exam_sess_);
-    MNN::Tensor *exam_output = exam_interp_->getSessionOutput(exam_sess_, nullptr);
-    //set the examplar output as search input 
-    //the type convert is nessary
-    MNN::Tensor *nchw_tensor = MNN::Tensor::create<float>(std::vector<int>{1, 256, 6, 6}, nullptr,
-                                                          MNN::Tensor::CAFFE);
-    exam_output->copyToHostTensor(nchw_tensor);
-    search_input_[0]->copyFromHostTensor(nchw_tensor);
+    //e0
+    MNN::Tensor *exam_output0 = exam_interp_->getSessionOutput(exam_sess_, "e0");
+    MNN::Tensor *nchw_tensor0 = MNN::Tensor::create<float>(std::vector<int>{1, 256, 7, 7}, nullptr, MNN::Tensor::CAFFE);
+    exam_output0->copyToHostTensor(nchw_tensor0);
+    search_input_[0]->copyFromHostTensor(nchw_tensor0);
+    //e1
+    MNN::Tensor *exam_output1 = exam_interp_->getSessionOutput(exam_sess_, "e1");
+    MNN::Tensor *nchw_tensor1 = MNN::Tensor::create<float>(std::vector<int>{1, 256, 7, 7}, nullptr, MNN::Tensor::CAFFE);
+    exam_output1->copyToHostTensor(nchw_tensor1);
+    search_input_[1]->copyFromHostTensor(nchw_tensor1);
+    //e2
+    MNN::Tensor *exam_output2 = exam_interp_->getSessionOutput(exam_sess_, "e2");
+    MNN::Tensor *nchw_tensor2 = MNN::Tensor::create<float>(std::vector<int>{1, 256, 7, 7}, nullptr, MNN::Tensor::CAFFE);
+    exam_output2->copyToHostTensor(nchw_tensor2);
+    search_input_[2]->copyFromHostTensor(nchw_tensor2);
     //exam_output->print();
     bbox_pos_ = bbox_pos;
     bbox_size_ = bbox_size;
 }
 
-Rect SiamRPN_MNN::track(cv::Mat img) {
-    int sz = size_z(bbox_size_);
+Rect SiamRPN_MNN::track(cv::Mat &img) {
+    float sz = size_z(bbox_size_);
     float scale_z = cfg.EXAMPLAR_SIZE / float(sz);
-    int sx = size_x(bbox_size_);
-    cv::Mat search_8u = get_subwindows(img, bbox_pos_, cfg.INSTANCE_SIZE, sx, channel_average_);
-    //debug
+    float sx = size_x(bbox_size_);
+    cv::Mat search_8u = get_subwindows(img, bbox_pos_, cfg.INSTANCE_SIZE, round(sx), channel_average_);
     //cv::Mat search_8u = cv::imread("E:\\BIP LAB\\siamtracker\\dataset\\search.png");
     cv::Mat search;
-
-    cv::imwrite("/storage/emulated/0/search_8u.jpg",search_8u);
     search_8u.convertTo(search, CV_32F);
-    MNN::Tensor *nhwc_tensor = MNN::Tensor::create<float>(
-            std::vector<int>{1, cfg.INSTANCE_SIZE, cfg.INSTANCE_SIZE, 3}, nullptr,
-            MNN::Tensor::TENSORFLOW);
+    MNN::Tensor *nhwc_tensor = MNN::Tensor::create<float>(std::vector<int>{1, cfg.INSTANCE_SIZE, cfg.INSTANCE_SIZE, 3},
+                                                          nullptr, MNN::Tensor::TENSORFLOW);
     float *nhwc_data = nhwc_tensor->host<float>();
     size_t nhwc_size = nhwc_tensor->size();
-    ::memcpy(nhwc_data, search.data, nhwc_size);
+    std::memcpy(nhwc_data, search.data, nhwc_size);
 
-    search_input_[1]->copyFromHostTensor(nhwc_tensor);
+    search_input_[3]->copyFromHostTensor(nhwc_tensor);
     search_interp_->runSession(search_sess_);
     MNN::Tensor *cls = search_interp_->getSessionOutput(search_sess_, "cls");
     MNN::Tensor *loc = search_interp_->getSessionOutput(search_sess_, "loc");
@@ -113,14 +87,13 @@ Rect SiamRPN_MNN::track(cv::Mat img) {
     loc->copyToHostTensor(loc_host);
     float *cls_ptr = cls_host->host<float>();
     float *loc_ptr = loc_host->host<float>();
-    //TODO: ANHCOR_NUM
-    int pred_size = score_size_ * score_size_ * 5;
+    int pred_size = score_size_ * score_size_ * cfg.ANCHOR_NUM;
     std::vector<float> score(pred_size);
     std::vector<float> pscore(pred_size);
     std::vector<Rect> pred_bbox(pred_size);
     std::vector<float> penalty(pred_size);
+
     for (int i = 0; i < pred_size; i++) {
-        //score[i] = exp(cls_ptr[2 * i + 1]) / (exp(cls_ptr[2 * i]) + exp(cls_ptr[2 * i + 1]));
         score[i] = exp(cls_ptr[pred_size + i]) / (exp(cls_ptr[i]) + exp(cls_ptr[pred_size + i]));
         float src_width = all_anchors_[i].x2 - all_anchors_[i].x1;
         float src_height = all_anchors_[i].y2 - all_anchors_[i].y1;
@@ -134,9 +107,16 @@ Rect SiamRPN_MNN::track(cv::Mat img) {
         // penalty
         float r = (bbox_size_[0] / bbox_size_[1]) / (pred_bbox[i].w / pred_bbox[i].h);
         float rc = fmax(r, 1. / r);
-        float s = size_z(std::vector<float>{bbox_size_[0] * scale_z, bbox_size_[1] * scale_z})
-                  / size_z(std::vector<float>{pred_bbox[i].w, pred_bbox[i].h});
+        std::vector<float> haha=std::vector<float>{bbox_size_[0] * scale_z, bbox_size_[1] * scale_z};
+        float s1 = size_z(haha);
+        std::vector<float> hehe=std::vector<float>{pred_bbox[i].w, pred_bbox[i].h};
+        float s2 = size_z(hehe);
+        float s = s1 / s2;
+        //TODO: the directly divide will cause inf?
+        //float s = size_z(std::vector<float>{bbox_size_[0] * scale_z, bbox_size_[1] * scale_z})
+        //    / size_z(std::vector<float>{pred_bbox[i].w, pred_bbox[i].h});
         float sc = fmax(s, 1. / s);
+        //std::cout << "sc: " << sc << std::endl;
         penalty[i] = exp(-(rc * sc - 1) * cfg.PENALTY_K);
         pscore[i] = penalty[i] * score[i];
         int idx = i % (score_size_ * score_size_);
@@ -146,16 +126,17 @@ Rect SiamRPN_MNN::track(cv::Mat img) {
     float best_score = pscore[best_idx];
     Rect best_bbox = pred_bbox[best_idx];
     //
-//    int x1 = best_bbox.cx - best_bbox.w / 2.;
-//    int y1 = best_bbox.cy - best_bbox.h / 2.;
-//    int iw = best_bbox.w;
-//    int ih = best_bbox.h;
-//    cv::rectangle(search_8u, { x1,y1,iw,ih }, cv::Scalar(0, 0, 255), 1, cv::LINE_8, 0);
-//    cv::imshow("search", search_8u);
-//    cv::waitKey();
-
-
+    //int x1 = best_bbox.cx - best_bbox.w / 2.;
+    //int y1 = best_bbox.cy - best_bbox.h / 2.;
+    //int iw = best_bbox.w;
+    //int ih = best_bbox.h;
+    //cv::rectangle(search_8u, { x1,y1,iw,ih }, cv::Scalar(0, 0, 255), 2, cv::LINE_8, 0);
+    ////cv::namedWindow("search_8u", cv::WINDOW_NORMAL | cv::WINDOW_KEEPRATIO);
+    ////cv::resizeWindow("search_8u", 600, 400);
+    //cv::imshow("search_8u", search_8u);
+    //cv::waitKey(10);
     //
+
     best_bbox.cx -= cfg.INSTANCE_SIZE / 2;
     best_bbox.cy -= cfg.INSTANCE_SIZE / 2;
     best_bbox.cx /= scale_z;
@@ -180,15 +161,15 @@ Rect SiamRPN_MNN::track(cv::Mat img) {
     return best_bbox;
 }
 
-int SiamRPN_MNN::size_z(std::vector<float> bbox_size) {
+int SiamRPN_MNN::size_z(std::vector<float> &bbox_size) {
     float context_amount = 0.5;
     float wz = bbox_size[0] + context_amount * (bbox_size[0] + bbox_size[1]);
     float hz = bbox_size[1] + context_amount * (bbox_size[0] + bbox_size[1]);
     float size_z = sqrtf(wz * hz);
-    return round(size_z);
+    return size_z;
 }
 
-int SiamRPN_MNN::size_x(std::vector<float> bbox_size) {
+int SiamRPN_MNN::size_x(std::vector<float> &bbox_size) {
     float context_amount = 0.5;
     float wz = bbox_size[0] + context_amount * (bbox_size[0] + bbox_size[1]);
     float hz = bbox_size[1] + context_amount * (bbox_size[0] + bbox_size[1]);
@@ -197,27 +178,42 @@ int SiamRPN_MNN::size_x(std::vector<float> bbox_size) {
     float d_search = (cfg.INSTANCE_SIZE - cfg.EXAMPLAR_SIZE) / 2;
     float pad = d_search / scale_z;
     float size_x = size_z + 2 * pad;
-    return round(size_x);
+    return size_x;
 }
 
-cv::Mat SiamRPN_MNN::get_subwindows(cv::Mat img, std::vector<float> pos, int dst_size, int ori_size,
-                                    cv::Scalar padding) {
+cv::Mat
+SiamRPN_MNN::get_subwindows(cv::Mat &img, std::vector<float> &pos, int dst_size, int ori_size, cv::Scalar padding) {
     float scale = float(dst_size) / float(ori_size);
-    float shift_x = -scale * (pos[0] - ori_size / 2);
-    float shift_y = -scale * (pos[1] - ori_size / 2);
+    float shift_x = -scale * floor(pos[0] - (ori_size + 1) / 2. + 0.5);
+    float shift_y = -scale * floor(pos[1] - (ori_size + 1) / 2. + 0.5);
     cv::Mat mapping = cv::Mat::zeros(2, 3, CV_32FC1);
     mapping.at<float>(0, 0) = scale;
     mapping.at<float>(1, 1) = scale;
     mapping.at<float>(0, 2) = shift_x;
     mapping.at<float>(1, 2) = shift_y;
     cv::Mat patch;
-    cv::warpAffine(img, patch, mapping, cv::Size(dst_size, dst_size), cv::INTER_LINEAR,
-                   cv::BORDER_CONSTANT, padding);
-    //cv::warpAffine(img, patch, mapping, cv::Size(dst_size, dst_size));
-    //cv::imshow("patch", patch);
-    //cv::waitKey();
+    cv::warpAffine(img, patch, mapping, cv::Size(dst_size, dst_size), cv::INTER_LINEAR, cv::BORDER_CONSTANT, padding);
     return patch;
 }
+
+std::vector<float> SiamRPN_MNN::hanning(int n) {
+    std::vector<float> window(n);
+    for (int i = 0; i < n; i++) {
+        window[i] = 0.5 - 0.5 * cos(2 * PI * i / (n - 1));
+    }
+    return window;
+}
+
+std::vector<float> SiamRPN_MNN::outer(std::vector<float> &vec1, std::vector<float> &vec2) {
+    std::vector<float> window(vec1.size() * vec2.size());
+    for (int i = 0; i < vec1.size(); i++) {
+        for (int j = 0; j < vec2.size(); j++) {
+            window[i * vec1.size() + j] = vec1[i] * vec2[j];
+        }
+    }
+    return window;
+}
+
 
 
 
