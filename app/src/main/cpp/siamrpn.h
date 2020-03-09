@@ -29,12 +29,16 @@ private:
     MNN::Session* search_sess_;
     std::vector<MNN::Tensor*> search_input_;
     //util functions
-    int size_z(std::vector<float>& bbox_size);
-    int size_x(std::vector<float>& bbox_size);
+    float size_z(std::vector<float>& bbox_size);
+    float size_x(std::vector<float>& bbox_size);
     cv::Mat get_subwindows(cv::Mat& img, std::vector<float>& pos, int dst_size, int ori_size, cv::Scalar padding);
     //windows
     std::vector<float> hanning(int n);
     std::vector<float> outer(std::vector<float>& vec1, std::vector<float>& vec2);
+    // tensor host for examplar output
+    MNN::Tensor* exam_out_host0_;
+    MNN::Tensor* exam_out_host1_;
+    MNN::Tensor* exam_out_host2_;
 
 };
 
