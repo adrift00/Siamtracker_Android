@@ -56,6 +56,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -195,8 +196,8 @@ public class MainActivity extends AppCompatActivity {
         verifyStoragePermissions(this);
         //copy to sd scard
         try {
-            copyBigDataToSD("siamrpn_mobi_examplar.mnn");
-            copyBigDataToSD("siamrpn_mobi_search.mnn");
+            copyBigDataToSD("siamrpn_mobi_pruning_examplar.mnn");
+            copyBigDataToSD("siamrpn_mobi_pruning_search.mnn");
 //            copyBigDataToSD("00000001.jpg");
 //            copyBigDataToSD("00000006.jpg");
         } catch (IOException e) {
@@ -370,6 +371,8 @@ public class MainActivity extends AppCompatActivity {
         mImageReader.setOnImageAvailableListener(new ImageReader.OnImageAvailableListener() {
             @Override
             public void onImageAvailable(ImageReader reader) {
+//                long beginTime=System.currentTimeMillis();
+//                Log.i(TAG,"read begin time: "+beginTime);
                 final Image image = reader.acquireLatestImage();
                 PREVIEW_RETURN_IMAGE_COUNT++;
                 if (PREVIEW_RETURN_IMAGE_COUNT % EXECUTION_FREQUENCY != 0) {
@@ -390,11 +393,14 @@ public class MainActivity extends AppCompatActivity {
                     mStartInit = false;
                 } else if (mStartTrack) {
                     byte[] yuvBytes = yuv2byte(image);
+//                    long process_time=System.currentTimeMillis();
+//                    Log.i(TAG,"process_time: "+(process_time));
+//                    Log.i(TAG,"read and convert time: "+(process_time-beginTime));
                     float[] trackBBox = siamtrackerTrack(yuvBytes, image.getWidth(), image.getHeight());
-                    Log.i(TAG, "onImageAvailable: origin track rect " + trackBBox[0] + " " +
+                    Log.i(TAG, "onImageAvailable: origin track rect: " + trackBBox[0] + " " +
                             trackBBox[1] + " " + trackBBox[2] + " " + trackBBox[3]);
                     mTrackRect = getTrackBBox(trackBBox);
-                    Log.i(TAG, "onImageAvailable: changed track rect" + mTrackRect.left + " " +
+                    Log.i(TAG, "onImageAvailable: changed track rect: " + mTrackRect.left + " " +
                             mTrackRect.top + " " + mTrackRect.right + " " + mTrackRect.bottom);
                     clearDraw();
                     mCanvas = mSurfaceHolder.lockCanvas();   // 得到surfaceView的画布
