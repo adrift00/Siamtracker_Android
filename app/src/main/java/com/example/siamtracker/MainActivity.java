@@ -159,20 +159,13 @@ public class MainActivity extends AppCompatActivity {
             int y = (int) event.getY();
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-//                    mInitRect.right += STROKE_WIDTH;
-//                    mInitRect.bottom += STROKE_WIDTH;
                     mInitRect.left = x;
                     mInitRect.top = y;
                     mInitRect.right = mInitRect.left;
                     mInitRect.bottom = mInitRect.top;
                 case MotionEvent.ACTION_MOVE:
-//                    Rect old = new Rect(mInitRect.left,
-//                            mInitRect.top,
-//                            mInitRect.right + STROKE_WIDTH,
-//                            mInitRect.bottom + STROKE_WIDTH);
                     mInitRect.right = x;
                     mInitRect.bottom = y;
-//                    old.union(x, y);
                     break;
                 case MotionEvent.ACTION_UP:
                     clearDraw();
@@ -196,17 +189,20 @@ public class MainActivity extends AppCompatActivity {
         verifyStoragePermissions(this);
         //copy to sd scard
         try {
+            // the origin mobilenetv2 model
+            copyBigDataToSD("siamrpn_mobi_examplar.mnn");
+            copyBigDataToSD("siamrpn_mobi_search.mnn");
+            // the pruning mobilenetv2 model
             copyBigDataToSD("siamrpn_mobi_pruning_examplar.mnn");
             copyBigDataToSD("siamrpn_mobi_pruning_search.mnn");
-//            copyBigDataToSD("00000001.jpg");
-//            copyBigDataToSD("00000006.jpg");
         } catch (IOException e) {
             e.printStackTrace();
         }
         // model init
         File sdDir = Environment.getExternalStorageDirectory();//获取跟目录
         String sdPath = sdDir.toString() + "/siamtracker/";
-        siamtrackerInitModel(sdPath);
+        String modelType="mobi_pruning";
+        siamtrackerInitModel(sdPath,modelType);
         mTextureView = findViewById(R.id.textureView);
         mTextureView.setSurfaceTextureListener(mTextureListener);
         startBackgroundThread();
@@ -633,7 +629,7 @@ public class MainActivity extends AppCompatActivity {
      * A native method that is implemented by the 'native-lib' native library,
      * which is packaged with this application.
      */
-    public native void siamtrackerInitModel(String path);
+    public native void siamtrackerInitModel(String path,String model_type);
 
     public native void siamtrackerInit(byte[] yuv_bytes, int width, int height, float[] bbox);
 

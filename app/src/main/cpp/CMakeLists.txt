@@ -20,12 +20,48 @@ set_target_properties(
         PROPERTIES IMPORTED_LOCATION
         ${LIB_DIR}/libMNN.so
 )
+add_library(MNN_EXP SHARED IMPORTED)
+set_target_properties(
+        MNN_EXP
+        PROPERTIES IMPORTED_LOCATION
+        ${LIB_DIR}/libMNN_Express.so
+)
+
+
+add_library(MNN_CL SHARED IMPORTED)
+set_target_properties(
+        MNN_CL
+        PROPERTIES IMPORTED_LOCATION
+        ${LIB_DIR}/libMNN_CL.so
+)
+add_library(MNN_GL SHARED IMPORTED)
+set_target_properties(
+        MNN_GL
+        PROPERTIES IMPORTED_LOCATION
+        ${LIB_DIR}/libMNN_GL.so
+)
+add_library(MNN_VULKAN SHARED IMPORTED)
+set_target_properties(
+        MNN_VULKAN
+        PROPERTIES IMPORTED_LOCATION
+        ${LIB_DIR}/libMNN_VULKAN.so
+)
+
+
 add_library(opencv_java4 SHARED IMPORTED)
 set_target_properties(
         opencv_java4
         PROPERTIES IMPORTED_LOCATION
         ${LIB_DIR}/libopencv_java4.so
 )
+
+
+#add_library(OpenCL SHARED IMPORTED)
+#set_target_properties(
+#        OpenCL
+#        PROPERTIES IMPORTED_LOCATION
+#        ${LIB_DIR}/libOpenCL.so
+#)
 
 file(GLOB SOURCE ${CMAKE_SOURCE_DIR}/*.cpp ${CMAKE_SOURCE_DIR}/*.h)
 add_library( # Sets the name of the library.
@@ -58,6 +94,9 @@ target_link_libraries( # Specifies the target library.
         # Links the target library to the log library
         # included in the NDK.
         MNN
+        MNN_CL
+        MNN_GL
+        MNN_VULKAN
         opencv_java4
         ${log-lib}
         )

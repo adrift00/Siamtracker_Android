@@ -2,34 +2,44 @@
 #include "include/opencv2/core/hal/interface.h"
 #include "include/MNN/Interpreter.hpp"
 #include "include/MNN/MNNForwardType.h"
+#include <jni.h>
 
 #define PI 3.1415926
 
-
-#include <jni.h>
 #include <android/log.h>
+
 #define TAG "cpp log"
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO,TAG,__VA_ARGS__)
 
-SiamRPN_MNN::SiamRPN_MNN(std::string modelPath) {
-    anchor_generator_ = std::make_shared<AnchorGenerator>(std::vector < float > {8},
-                                                          std::vector < float > {0.33, 0.5, 1, 2, 3},
+SiamRPN_MNN::SiamRPN_MNN(std::string modelPath, std::string model_type) {
+    if (model_type == "mobi") {
+        cfg = mobi_cfg;
+    } else if (model_type == "mobi_pruning") {
+        cfg = mobi_pruning_cfg;
+    } else if (model_type == "alex") {
+        cfg = alex_cfg;
+    } else {
+        LOGI("model type unvalid!");
+    }
+    anchor_generator_ = std::make_shared<AnchorGenerator>(std::vector<float>{8},
+                                                          std::vector<float>{0.33, 0.5, 1, 2, 3},
                                                           8);
     score_size_ = int((cfg.INSTANCE_SIZE - cfg.EXAMPLAR_SIZE) / cfg.STRIDE) + 1 + cfg.BASE_SIZE;
     std::vector<float> h = hanning(score_size_);
     window_ = outer(h, h);
     all_anchors_ = anchor_generator_->generate_all_anchors(int(cfg.INSTANCE_SIZE / 2), score_size_);
     //examplar
-    std::string examplar_path = modelPath + "siamrpn_mobi_pruning_examplar.mnn";
+    std::string examplar_path = modelPath + cfg.EXAMPLAR_MODEL_NAME;
     exam_interp_ = MNN::Interpreter::createFromFile(examplar_path.c_str());
-    MNN::ScheduleConfig cfg;
-    cfg.type=MNN_FORWARD_OPENCL;
-    exam_sess_ = exam_interp_->createSession(cfg);
+    MNN::ScheduleConfig sched_cfg;
+    sched_cfg.type = MNN_FORWARD_OPENCL;
+//    sched_cfg.backupType=MNN_FORWARD_VULKAN;
+    exam_sess_ = exam_interp_->createSession(sched_cfg);
     exam_input_ = exam_interp_->getSessionInput(exam_sess_, nullptr);
     //search
-    std::string search_path = modelPath + "siamrpn_mobi_pruning_search.mnn";
+    std::string search_path = modelPath + cfg.SEARCH_MODEL_NAME;
     search_interp_ = MNN::Interpreter::createFromFile(search_path.c_str());
-    search_sess_ = search_interp_->createSession(cfg);
+    search_sess_ = search_interp_->createSession(sched_cfg);
     search_input_.push_back(search_interp_->getSessionInput(search_sess_, "e0"));
     search_input_.push_back(search_interp_->getSessionInput(search_sess_, "e1"));
     search_input_.push_back(search_interp_->getSessionInput(search_sess_, "e2"));
@@ -37,6 +47,7 @@ SiamRPN_MNN::SiamRPN_MNN(std::string modelPath) {
 }
 
 void SiamRPN_MNN::init(cv::Mat &img, Rect bbox) {
+    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
     std::vector<float> bbox_pos{bbox.cx, bbox.cy};
     std::vector<float> bbox_size{bbox.w, bbox.h};
     float sz = size_z(bbox_size);
@@ -48,7 +59,7 @@ void SiamRPN_MNN::init(cv::Mat &img, Rect bbox) {
 
     //wrap for input tensor
     MNN::Tensor *nhwc_tensor = MNN::Tensor::create<float>(
-            std::vector < int > {1, cfg.EXAMPLAR_SIZE, cfg.EXAMPLAR_SIZE, 3}, nullptr, MNN::Tensor::TENSORFLOW);
+            std::vector<int>{1, cfg.EXAMPLAR_SIZE, cfg.EXAMPLAR_SIZE, 3}, nullptr, MNN::Tensor::TENSORFLOW);
     float *nhwc_data = nhwc_tensor->host<float>();
     size_t nhwc_size = nhwc_tensor->size();
     std::memcpy(nhwc_data, examplar.data, nhwc_size);
@@ -56,21 +67,29 @@ void SiamRPN_MNN::init(cv::Mat &img, Rect bbox) {
     exam_interp_->runSession(exam_sess_);
     //e0
     MNN::Tensor *exam_output0 = exam_interp_->getSessionOutput(exam_sess_, "e0");
-    exam_out_host0_ = MNN::Tensor::create<float>(std::vector < int > {1, 192, 7, 7}, nullptr, MNN::Tensor::CAFFE);
+    exam_out_host0_ = MNN::Tensor::create<float>(std::vector<int>{1, cfg.OUT_CHANNELS, 7, 7}, nullptr,
+                                                 MNN::Tensor::CAFFE);
     exam_output0->copyToHostTensor(exam_out_host0_);
     search_input_[0]->copyFromHostTensor(exam_out_host0_);
     //e1
     MNN::Tensor *exam_output1 = exam_interp_->getSessionOutput(exam_sess_, "e1");
-    exam_out_host1_ = MNN::Tensor::create<float>(std::vector < int > {1, 192, 7, 7}, nullptr, MNN::Tensor::CAFFE);
+    exam_out_host1_ = MNN::Tensor::create<float>(std::vector<int>{1, cfg.OUT_CHANNELS, 7, 7}, nullptr,
+                                                 MNN::Tensor::CAFFE);
     exam_output1->copyToHostTensor(exam_out_host1_);
     search_input_[1]->copyFromHostTensor(exam_out_host1_);
     //e2
     MNN::Tensor *exam_output2 = exam_interp_->getSessionOutput(exam_sess_, "e2");
-    exam_out_host2_ = MNN::Tensor::create<float>(std::vector < int > {1, 192, 7, 7}, nullptr, MNN::Tensor::CAFFE);
+    exam_out_host2_ = MNN::Tensor::create<float>(std::vector<int>{1, cfg.OUT_CHANNELS, 7, 7}, nullptr,
+                                                 MNN::Tensor::CAFFE);
     exam_output2->copyToHostTensor(exam_out_host2_);
     search_input_[2]->copyFromHostTensor(exam_out_host2_);
     bbox_pos_ = bbox_pos;
     bbox_size_ = bbox_size;
+    std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
+    std::chrono::duration<double> time_span = std::chrono::duration_cast<std::chrono::duration<double>>(now - begin);
+    float span_time = static_cast<float>(time_span.count());
+    LOGI("cpp init time: %f", span_time);
+    std::cout << " ";
 }
 
 Rect SiamRPN_MNN::track(cv::Mat &img) {
@@ -81,7 +100,7 @@ Rect SiamRPN_MNN::track(cv::Mat &img) {
     cv::Mat search;
     search_8u.convertTo(search, CV_32F);
     MNN::Tensor *nhwc_tensor = MNN::Tensor::create<float>(
-            std::vector < int > {1, cfg.INSTANCE_SIZE, cfg.INSTANCE_SIZE, 3}, nullptr, MNN::Tensor::TENSORFLOW);
+            std::vector<int>{1, cfg.INSTANCE_SIZE, cfg.INSTANCE_SIZE, 3}, nullptr, MNN::Tensor::TENSORFLOW);
     float *nhwc_data = nhwc_tensor->host<float>();
     size_t nhwc_size = nhwc_tensor->size();
     std::memcpy(nhwc_data, search.data, nhwc_size);
@@ -106,7 +125,7 @@ Rect SiamRPN_MNN::track(cv::Mat &img) {
     int pred_size = score_size_ * score_size_ * cfg.ANCHOR_NUM;
     std::vector<float> score(pred_size);
     std::vector<float> pscore(pred_size);
-    std::vector <Rect> pred_bbox(pred_size);
+    std::vector<Rect> pred_bbox(pred_size);
     std::vector<float> penalty(pred_size);
 
     for (int i = 0; i < pred_size; i++) {
@@ -123,8 +142,8 @@ Rect SiamRPN_MNN::track(cv::Mat &img) {
         // penalty
         float r = (bbox_size_[0] / bbox_size_[1]) / (pred_bbox[i].w / pred_bbox[i].h);
         float rc = fmax(r, 1. / r);
-        std::vector<float> s1 = std::vector < float > {bbox_size_[0] * scale_z, bbox_size_[1] * scale_z};
-        std::vector<float> s2 = std::vector < float > {pred_bbox[i].w, pred_bbox[i].h};
+        std::vector<float> s1 = std::vector<float>{bbox_size_[0] * scale_z, bbox_size_[1] * scale_z};
+        std::vector<float> s2 = std::vector<float>{pred_bbox[i].w, pred_bbox[i].h};
         float s = size_z(s1) / size_z(s2);
         float sc = fmax(s, 1. / s);
         penalty[i] = exp(-(rc * sc - 1) * cfg.PENALTY_K);

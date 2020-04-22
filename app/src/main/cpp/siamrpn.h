@@ -8,7 +8,7 @@
 #include "config.h"
 class SiamRPN_MNN{
 public:
-    SiamRPN_MNN(std::string modelPath);
+    SiamRPN_MNN(std::string modelPath,std::string model_type);
     void init(cv::Mat& img, Rect bbox);
     Rect track(cv::Mat& img);
 
