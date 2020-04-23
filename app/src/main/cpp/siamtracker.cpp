@@ -30,6 +30,7 @@ Java_com_example_siamtracker_MainActivity_siamtrackerInit(
         jint height,
         jfloatArray bbox_
 ) {
+    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
     unsigned char *yuv_ptr = (unsigned char *) (env->GetByteArrayElements(yuv_bytes, 0));
     cv::Mat yuv_img(int(height * 1.5), width, CV_8UC1);
     ::memcpy(yuv_img.data, yuv_ptr, (size_t) (width * height * 1.5));
@@ -42,13 +43,13 @@ Java_com_example_siamtracker_MainActivity_siamtrackerInit(
     init_bbox.w = bbox[2];
     init_bbox.h = bbox[3];
     //debug
-//    init_bbox.cx = 365.2075;
-//    init_bbox.cy = 194.595;
-//    init_bbox.w = 106.1308;
-//    init_bbox.h = 96.4144;
     tracker->init(init_img, init_bbox);
     cv::Rect rect(int(bbox[0] - bbox[2] / 2.f), int(bbox[1] - bbox[3] / 2), int(bbox[2]), int(bbox[3]));
     cv::rectangle(init_img, rect, cv::Scalar(0, 0, 255), 1, cv::LINE_8, 0);
+    std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
+    std::chrono::duration<double> time_span = std::chrono::duration_cast<std::chrono::duration<double>>(now - begin);
+    float span_time = static_cast<float>(time_span.count());
+    LOGI("cpp init time: %f", span_time);
 }
 extern "C" JNIEXPORT jfloatArray JNICALL
 Java_com_example_siamtracker_MainActivity_siamtrackerTrack(

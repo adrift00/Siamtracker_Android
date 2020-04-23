@@ -19,7 +19,7 @@ SiamRPN_MNN::SiamRPN_MNN(std::string modelPath, std::string model_type) {
     } else if (model_type == "alex") {
         cfg = alex_cfg;
     } else {
-        LOGI("model type unvalid!");
+        LOGI("model type invalid!");
     }
     anchor_generator_ = std::make_shared<AnchorGenerator>(std::vector<float>{8},
                                                           std::vector<float>{0.33, 0.5, 1, 2, 3},
@@ -32,8 +32,8 @@ SiamRPN_MNN::SiamRPN_MNN(std::string modelPath, std::string model_type) {
     std::string examplar_path = modelPath + cfg.EXAMPLAR_MODEL_NAME;
     exam_interp_ = MNN::Interpreter::createFromFile(examplar_path.c_str());
     MNN::ScheduleConfig sched_cfg;
-//    sched_cfg.type = MNN_FORWARD_OPENCL;
-//    sched_cfg.backupType=MNN_FORWARD_VULKAN;
+    // the time use precision low has no affect
+//    sched_cfg.backendConfig->precision = MNN::BackendConfig::Precision_Low;
     exam_sess_ = exam_interp_->createSession(sched_cfg);
     exam_input_ = exam_interp_->getSessionInput(exam_sess_, nullptr);
     //search
@@ -57,16 +57,13 @@ SiamRPN_MNN::SiamRPN_MNN(std::string modelPath, std::string model_type) {
 }
 
 void SiamRPN_MNN::init(cv::Mat &img, Rect bbox) {
-    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
     std::vector<float> bbox_pos{bbox.cx, bbox.cy};
     std::vector<float> bbox_size{bbox.w, bbox.h};
     float sz = size_z(bbox_size);
     channel_average_ = cv::mean(img);
-    cv::Mat examplar_8u = get_subwindows(img, bbox_pos, cfg.EXAMPLAR_SIZE, round(sz), channel_average_);
+    cv::Mat examplar = get_subwindows(img, bbox_pos, cfg.EXAMPLAR_SIZE, round(sz), channel_average_);
     //cv::Mat examplar_8u = cv::imread("E:\\BIP LAB\\siamtracker\\dataset\\examplar.png");
-    cv::Mat examplar;
-    examplar_8u.convertTo(examplar, CV_32F);
-
+    examplar.convertTo(examplar, CV_32FC3);
     //wrap for input tensor
     MNN::Tensor *nhwc_tensor = MNN::Tensor::create<float>(
             std::vector<int>{1, cfg.EXAMPLAR_SIZE, cfg.EXAMPLAR_SIZE, 3}, nullptr, MNN::Tensor::TENSORFLOW);
@@ -85,20 +82,14 @@ void SiamRPN_MNN::init(cv::Mat &img, Rect bbox) {
     }
     bbox_pos_ = bbox_pos;
     bbox_size_ = bbox_size;
-    std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
-    std::chrono::duration<double> time_span = std::chrono::duration_cast<std::chrono::duration<double>>(now - begin);
-    float span_time = static_cast<float>(time_span.count());
-    LOGI("cpp init time: %f", span_time);
-    std::cout << " ";
 }
 
 Rect SiamRPN_MNN::track(cv::Mat &img) {
     float sz = size_z(bbox_size_);
     float scale_z = cfg.EXAMPLAR_SIZE / float(sz);
     float sx = size_x(bbox_size_);
-    cv::Mat search_8u = get_subwindows(img, bbox_pos_, cfg.INSTANCE_SIZE, round(sx), channel_average_);
-    cv::Mat search;
-    search_8u.convertTo(search, CV_32F);
+    cv::Mat search = get_subwindows(img, bbox_pos_, cfg.INSTANCE_SIZE, round(sx), channel_average_);
+    search.convertTo(search, CV_32FC3);
     MNN::Tensor *nhwc_tensor = MNN::Tensor::create<float>(
             std::vector<int>{1, cfg.INSTANCE_SIZE, cfg.INSTANCE_SIZE, 3}, nullptr, MNN::Tensor::TENSORFLOW);
     float *nhwc_data = nhwc_tensor->host<float>();
