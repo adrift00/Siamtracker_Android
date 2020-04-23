@@ -32,7 +32,7 @@ SiamRPN_MNN::SiamRPN_MNN(std::string modelPath, std::string model_type) {
     std::string examplar_path = modelPath + cfg.EXAMPLAR_MODEL_NAME;
     exam_interp_ = MNN::Interpreter::createFromFile(examplar_path.c_str());
     MNN::ScheduleConfig sched_cfg;
-    sched_cfg.type = MNN_FORWARD_OPENCL;
+//    sched_cfg.type = MNN_FORWARD_OPENCL;
 //    sched_cfg.backupType=MNN_FORWARD_VULKAN;
     exam_sess_ = exam_interp_->createSession(sched_cfg);
     exam_input_ = exam_interp_->getSessionInput(exam_sess_, nullptr);
@@ -40,10 +40,20 @@ SiamRPN_MNN::SiamRPN_MNN(std::string modelPath, std::string model_type) {
     std::string search_path = modelPath + cfg.SEARCH_MODEL_NAME;
     search_interp_ = MNN::Interpreter::createFromFile(search_path.c_str());
     search_sess_ = search_interp_->createSession(sched_cfg);
-    search_input_.push_back(search_interp_->getSessionInput(search_sess_, "e0"));
-    search_input_.push_back(search_interp_->getSessionInput(search_sess_, "e1"));
-    search_input_.push_back(search_interp_->getSessionInput(search_sess_, "e2"));
+    if (model_type == "alex") {
+        search_input_.push_back(search_interp_->getSessionInput(search_sess_, "e0"));
+    } else {
+        search_input_.push_back(search_interp_->getSessionInput(search_sess_, "e0"));
+        search_input_.push_back(search_interp_->getSessionInput(search_sess_, "e1"));
+        search_input_.push_back(search_interp_->getSessionInput(search_sess_, "e2"));
+    }
     search_input_.push_back(search_interp_->getSessionInput(search_sess_, "search"));
+    // examplar host tensor
+    if (model_type == "alex") {
+        exam_out_hosts_.resize(1); //the alexnet backbone only contains one outputs
+    } else {
+        exam_out_hosts_.resize(3);
+    }
 }
 
 void SiamRPN_MNN::init(cv::Mat &img, Rect bbox) {
@@ -65,24 +75,14 @@ void SiamRPN_MNN::init(cv::Mat &img, Rect bbox) {
     std::memcpy(nhwc_data, examplar.data, nhwc_size);
     exam_input_->copyFromHostTensor(nhwc_tensor);
     exam_interp_->runSession(exam_sess_);
-    //e0
-    MNN::Tensor *exam_output0 = exam_interp_->getSessionOutput(exam_sess_, "e0");
-    exam_out_host0_ = MNN::Tensor::create<float>(std::vector<int>{1, cfg.OUT_CHANNELS, 7, 7}, nullptr,
-                                                 MNN::Tensor::CAFFE);
-    exam_output0->copyToHostTensor(exam_out_host0_);
-    search_input_[0]->copyFromHostTensor(exam_out_host0_);
-    //e1
-    MNN::Tensor *exam_output1 = exam_interp_->getSessionOutput(exam_sess_, "e1");
-    exam_out_host1_ = MNN::Tensor::create<float>(std::vector<int>{1, cfg.OUT_CHANNELS, 7, 7}, nullptr,
-                                                 MNN::Tensor::CAFFE);
-    exam_output1->copyToHostTensor(exam_out_host1_);
-    search_input_[1]->copyFromHostTensor(exam_out_host1_);
-    //e2
-    MNN::Tensor *exam_output2 = exam_interp_->getSessionOutput(exam_sess_, "e2");
-    exam_out_host2_ = MNN::Tensor::create<float>(std::vector<int>{1, cfg.OUT_CHANNELS, 7, 7}, nullptr,
-                                                 MNN::Tensor::CAFFE);
-    exam_output2->copyToHostTensor(exam_out_host2_);
-    search_input_[2]->copyFromHostTensor(exam_out_host2_);
+    for (int i = 0; i < exam_out_hosts_.size(); i++) {
+        std::string out_name = "e" + std::to_string(i);
+        MNN::Tensor *exam_output = exam_interp_->getSessionOutput(exam_sess_, out_name.c_str());
+        exam_out_hosts_[i] = MNN::Tensor::create<float>(std::vector<int>{1, cfg.OUT_CHANNELS, 7, 7}, nullptr,
+                                                        MNN::Tensor::CAFFE);
+        exam_output->copyToHostTensor(exam_out_hosts_[i]);
+        search_input_[i]->copyFromHostTensor(exam_out_hosts_[i]);
+    }
     bbox_pos_ = bbox_pos;
     bbox_size_ = bbox_size;
     std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
@@ -105,10 +105,9 @@ Rect SiamRPN_MNN::track(cv::Mat &img) {
     size_t nhwc_size = nhwc_tensor->size();
     std::memcpy(nhwc_data, search.data, nhwc_size);
     //NOTE: the e0-2 need to be copied because the MNN will change the input when running, will cost some time.
-    search_input_[0]->copyFromHostTensor(exam_out_host0_);
-    search_input_[1]->copyFromHostTensor(exam_out_host1_);
-    search_input_[2]->copyFromHostTensor(exam_out_host2_);
-
+    for (int i = 0; i < exam_out_hosts_.size(); i++) {
+        search_input_[i]->copyFromHostTensor(exam_out_hosts_[i]);
+    }
     search_input_[3]->copyFromHostTensor(nhwc_tensor);
 
     search_interp_->runSession(search_sess_);
@@ -132,8 +131,8 @@ Rect SiamRPN_MNN::track(cv::Mat &img) {
         score[i] = exp(cls_ptr[pred_size + i]) / (exp(cls_ptr[i]) + exp(cls_ptr[pred_size + i]));
         float src_width = all_anchors_[i].x2 - all_anchors_[i].x1;
         float src_height = all_anchors_[i].y2 - all_anchors_[i].y1;
-        float src_ctr_x = all_anchors_[i].x1 + 0.5 * src_width;
-        float src_ctr_y = all_anchors_[i].y1 + 0.5 * src_height;
+        float src_ctr_x = all_anchors_[i].x1 + 0.5f * src_width;
+        float src_ctr_y = all_anchors_[i].y1 + 0.5f * src_height;
 
         pred_bbox[i].cx = loc_ptr[i] * src_width + src_ctr_x;
         pred_bbox[i].cy = loc_ptr[pred_size + i] * src_height + src_ctr_y;
@@ -141,11 +140,11 @@ Rect SiamRPN_MNN::track(cv::Mat &img) {
         pred_bbox[i].h = src_height * exp(loc_ptr[3 * pred_size + i]);
         // penalty
         float r = (bbox_size_[0] / bbox_size_[1]) / (pred_bbox[i].w / pred_bbox[i].h);
-        float rc = fmax(r, 1. / r);
+        float rc = fmax(r, 1.f / r);
         std::vector<float> s1 = std::vector<float>{bbox_size_[0] * scale_z, bbox_size_[1] * scale_z};
         std::vector<float> s2 = std::vector<float>{pred_bbox[i].w, pred_bbox[i].h};
         float s = size_z(s1) / size_z(s2);
-        float sc = fmax(s, 1. / s);
+        float sc = fmax(s, 1.f / s);
         penalty[i] = exp(-(rc * sc - 1) * cfg.PENALTY_K);
         pscore[i] = penalty[i] * score[i];
         int idx = i % (score_size_ * score_size_);
@@ -203,8 +202,8 @@ cv::Mat
 SiamRPN_MNN::get_subwindows(cv::Mat &img, std::vector<float> &pos, int dst_size, int ori_size, cv::Scalar padding) {
     //TODO: the speed of the func maybe slow because of warpAffine
     float scale = float(dst_size) / float(ori_size);
-    float shift_x = -floor(pos[0] - (ori_size + 1) / 2. + 0.5);
-    float shift_y = -floor(pos[1] - (ori_size + 1) / 2. + 0.5);
+    float shift_x = -floor(pos[0] - (ori_size + 1) / 2.f + 0.5);
+    float shift_y = -floor(pos[1] - (ori_size + 1) / 2.f + 0.5);
     cv::Mat mapping = cv::Mat::zeros(2, 3, CV_32FC1);
     mapping.at<float>(0, 0) = 1.0;
     mapping.at<float>(1, 1) = 1.0;

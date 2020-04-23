@@ -8,12 +8,11 @@ import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ImageFormat;
-import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
-import android.graphics.RectF;
 import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
@@ -21,8 +20,6 @@ import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CaptureRequest;
-import android.hardware.camera2.CaptureResult;
-import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.MeteringRectangle;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.Image;
@@ -41,6 +38,10 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.TextureView;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -56,7 +57,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -87,26 +87,24 @@ public class MainActivity extends AppCompatActivity {
     private CameraCaptureSession mCaptureSession;
 
     private Size mPreviewSize;
-    private CaptureRequest mPreviewRequest;
     private Surface mPreviewSurface;
     private CaptureRequest.Builder mPreviewRequestBuilder;
 
     private AutoFitTextureView mTextureView;
 
-    private HandlerThread mBackgroundThread;     // 处理拍照等工作的子线程
-    private Handler mBackgroundHandler;          // 上面定义的子线程的处理器
     private ImageReader mImageReader;
-    private SurfaceView mSurfaceView;
     private SurfaceHolder mSurfaceHolder;
     // 初始化的矩形
     private Rect mInitRect = new Rect(0, 0, 0, 0);
     private Rect mTrackRect = new Rect(0, 0, 0, 0);
-    private final int STROKE_WIDTH = 5;
     private Paint mPaint;  // 画框
     private Canvas mCanvas;     // 画布
     //
     private boolean mStartInit = false;
     private boolean mStartTrack = false;
+
+    //
+    private Spinner mSpinner;
 
     //surface 状态回调
     TextureView.SurfaceTextureListener mTextureListener = new TextureView.SurfaceTextureListener() {
@@ -168,7 +166,11 @@ public class MainActivity extends AppCompatActivity {
                     mInitRect.bottom = y;
                     break;
                 case MotionEvent.ACTION_UP:
-                    clearDraw();
+                    //TODO: add the if statement to avoid clearDraw twice when switch model,
+                    // maybe have more elegent way to solve it.
+                    if (mStartInit == true || mStartTrack == true) {
+                        clearDraw();
+                    }
                     transformBBox(mInitRect);
                     mCanvas = mSurfaceHolder.lockCanvas();   // 得到surfaceView的画布
                     mCanvas.drawRect(mInitRect, mPaint);
@@ -201,13 +203,13 @@ public class MainActivity extends AppCompatActivity {
         // model init
         File sdDir = Environment.getExternalStorageDirectory();//获取跟目录
         String sdPath = sdDir.toString() + "/siamtracker/";
-        String modelType="mobi_pruning";
-        siamtrackerInitModel(sdPath,modelType);
+        String modelType = "mobi";
+        siamtrackerInitModel(sdPath, modelType);
         mTextureView = findViewById(R.id.textureView);
         mTextureView.setSurfaceTextureListener(mTextureListener);
         startBackgroundThread();
         // surfaceView for paint and select
-        mSurfaceView = findViewById(R.id.surfaceView);
+        SurfaceView mSurfaceView = findViewById(R.id.surfaceView);
         mSurfaceView.setZOrderOnTop(true);  // 设置surfaceView在顶层
         mSurfaceView.getHolder().setFormat(PixelFormat.TRANSPARENT); // 设置surfaceView为透明
         mSurfaceHolder = mSurfaceView.getHolder();  // 获取surfaceHolder以便后面画框
@@ -216,8 +218,36 @@ public class MainActivity extends AppCompatActivity {
         mPaint = new Paint();  // 写文本的paint
         mPaint.setColor(Color.YELLOW);
         mPaint.setStyle(Paint.Style.STROKE);//不填充
+        int STROKE_WIDTH = 5;
         mPaint.setStrokeWidth(STROKE_WIDTH); //线的宽度
         mCanvas = new Canvas();  // 画布
+        //
+        mSpinner = findViewById(R.id.spinner);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                R.array.spinner_array, R.layout.spinner_item);
+        // Specify the layout to use when the list of choices appears
+        adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        // Apply the adapter to the spinner
+        mSpinner.setAdapter(adapter);
+
+        mSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+                String[] modelTypeArr = {"mobi", "mobi_pruning", "alex"};
+                String modelType = modelTypeArr[pos];
+                File sdDir = Environment.getExternalStorageDirectory();//获取跟目录
+                String sdPath = sdDir.toString() + "/siamtracker/";
+                siamtrackerInitModel(sdPath, modelType);
+                mStartTrack = false;
+                mStartInit = false;
+                clearDraw();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // Another interface callback
+            }
+        });
     }
 
     @Override
@@ -230,9 +260,11 @@ public class MainActivity extends AppCompatActivity {
      * 开启处理图片子线程
      */
     private void startBackgroundThread() {
-        mBackgroundThread = new HandlerThread("CameraBackground");
+        // 处理拍照等工作的子线程
+        HandlerThread mBackgroundThread = new HandlerThread("CameraBackground");
         mBackgroundThread.start();
-        mBackgroundHandler = new Handler(mBackgroundThread.getLooper());
+        // 上面定义的子线程的处理器
+        Handler mBackgroundHandler = new Handler(mBackgroundThread.getLooper());
     }
 
     private void setupCamera(int width, int height) {
@@ -347,7 +379,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void repeatPreview() {
         mPreviewRequestBuilder.setTag(TAG_PREVIEW);
-        mPreviewRequest = mPreviewRequestBuilder.build();
+        CaptureRequest mPreviewRequest = mPreviewRequestBuilder.build();
         //设置反复捕获数据的请求，这样预览界面就会一直有数据显示
         try {
             mCaptureSession.setRepeatingRequest(mPreviewRequest, null, null);
@@ -506,9 +538,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void clearDraw() {
         try {
-            mCanvas = mSurfaceHolder.lockCanvas(null);
-            mCanvas.drawColor(Color.WHITE);
-            mCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.SRC);
+            mCanvas = mSurfaceHolder.lockCanvas();
+            mCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -629,7 +660,7 @@ public class MainActivity extends AppCompatActivity {
      * A native method that is implemented by the 'native-lib' native library,
      * which is packaged with this application.
      */
-    public native void siamtrackerInitModel(String path,String model_type);
+    public native void siamtrackerInitModel(String path, String model_type);
 
     public native void siamtrackerInit(byte[] yuv_bytes, int width, int height, float[] bbox);
 

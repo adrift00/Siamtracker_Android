@@ -36,9 +36,7 @@ private:
     std::vector<float> hanning(int n);
     std::vector<float> outer(std::vector<float>& vec1, std::vector<float>& vec2);
     // tensor host for examplar output
-    MNN::Tensor* exam_out_host0_;
-    MNN::Tensor* exam_out_host1_;
-    MNN::Tensor* exam_out_host2_;
+    std::vector<MNN::Tensor*> exam_out_hosts_;
 
 };
 
