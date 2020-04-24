@@ -3,9 +3,9 @@
 #include <string>
 #include <opencv2/imgproc/types_c.h>
 #include <chrono>
-#include "siamrpn.h"
+#include "siam_tracker.h"
 
-SiamRPN_MNN *tracker;
+SiamTracker *tracker;
 #define TAG "cpp log"
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO,TAG,__VA_ARGS__)
 extern "C" JNIEXPORT void JNICALL
@@ -17,8 +17,7 @@ Java_com_example_siamtracker_MainActivity_siamtrackerInitModel(
 ) {
     const char *modelPath = env->GetStringUTFChars(path, 0);
     const char *modelType=env->GetStringUTFChars(model_type_,0);
-    tracker = new SiamRPN_MNN(modelPath,modelType);
-
+    tracker = new SiamTracker(modelPath, modelType);
 }
 
 extern "C" JNIEXPORT void JNICALL

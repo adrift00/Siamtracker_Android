@@ -11,7 +11,6 @@ import android.graphics.ImageFormat;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CameraAccessException;
@@ -41,7 +40,6 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -105,6 +103,11 @@ public class MainActivity extends AppCompatActivity {
 
     //
     private Spinner mSpinner;
+
+    private boolean mSwitchModel = false;
+
+    String[] mModelTypes = {"mobi", "mobi_pruning", "alex"};
+    String mModelType;
 
     //surface 状态回调
     TextureView.SurfaceTextureListener mTextureListener = new TextureView.SurfaceTextureListener() {
@@ -233,19 +236,13 @@ public class MainActivity extends AppCompatActivity {
         mSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-                String[] modelTypeArr = {"mobi", "mobi_pruning", "alex"};
-                String modelType = modelTypeArr[pos];
-                File sdDir = Environment.getExternalStorageDirectory();//获取跟目录
-                String sdPath = sdDir.toString() + "/siamtracker/";
-                siamtrackerInitModel(sdPath, modelType);
-                mStartTrack = false;
-                mStartInit = false;
-                clearDraw();
+                mModelType = mModelTypes[pos];
+                mSwitchModel = true;
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-                // Another interface callback
+                mSwitchModel = false;
             }
         });
     }
@@ -286,8 +283,6 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     mTextureView.setAspectRatio(mPreviewSize.getHeight(), mPreviewSize.getWidth());
                 }
-
-
                 mCameraId = cameraId;
                 break;
             }
@@ -325,30 +320,6 @@ public class MainActivity extends AppCompatActivity {
             mImageReader = null;
         }
     }
-
-//    private void configureTransform(int viewWidth, int viewHeight) {
-//        if (null == mTextureView || null == mPreviewSize) {
-//            return;
-//        }
-//        int rotation = getWindowManager().getDefaultDisplay().getRotation();
-//        Matrix matrix = new Matrix();
-//        RectF viewRect = new RectF(0, 0, viewWidth, viewHeight);
-//        RectF bufferRect = new RectF(0, 0, mPreviewSize.getHeight(), mPreviewSize.getWidth());
-//        float centerX = viewRect.centerX();
-//        float centerY = viewRect.centerY();
-//        if (Surface.ROTATION_90 == rotation || Surface.ROTATION_270 == rotation) {
-//            bufferRect.offset(centerX - bufferRect.centerX(), centerY - bufferRect.centerY());
-//            matrix.setRectToRect(viewRect, bufferRect, Matrix.ScaleToFit.FILL);
-//            float scale = Math.max(
-//                    (float) viewHeight / mPreviewSize.getHeight(),
-//                    (float) viewWidth / mPreviewSize.getWidth());
-//            matrix.postScale(scale, scale, centerX, centerY);
-//            matrix.postRotate(90 * (rotation - 2), centerX, centerY);
-//        } else if (Surface.ROTATION_180 == rotation) {
-//            matrix.postRotate(180, centerX, centerY);
-//        }
-//        mTextureView.setTransform(matrix);
-//    }
 
     private void startPreview() {
         setupImageReader();
@@ -399,8 +370,6 @@ public class MainActivity extends AppCompatActivity {
         mImageReader.setOnImageAvailableListener(new ImageReader.OnImageAvailableListener() {
             @Override
             public void onImageAvailable(ImageReader reader) {
-//                long beginTime=System.currentTimeMillis();
-//                Log.i(TAG,"read begin time: "+beginTime);
                 final Image image = reader.acquireLatestImage();
                 PREVIEW_RETURN_IMAGE_COUNT++;
                 if (PREVIEW_RETURN_IMAGE_COUNT % EXECUTION_FREQUENCY != 0) {
@@ -408,6 +377,15 @@ public class MainActivity extends AppCompatActivity {
                     return;
                 }
                 PREVIEW_RETURN_IMAGE_COUNT = 0;
+                if (mSwitchModel) {
+                    File sdDir = Environment.getExternalStorageDirectory();//获取根目录
+                    String sdPath = sdDir.toString() + "/siamtracker/";
+//                    siamtrackerInitModel(sdPath, mModelType);
+                    clearDraw();
+                    mSwitchModel = false;
+                    mStartInit = false;
+                    mStartTrack = false;
+                }
                 if (mStartInit) {
                     //get byte data
                     byte[] yuvBytes = yuv2byte(image);
@@ -421,9 +399,6 @@ public class MainActivity extends AppCompatActivity {
                     mStartInit = false;
                 } else if (mStartTrack) {
                     byte[] yuvBytes = yuv2byte(image);
-//                    long process_time=System.currentTimeMillis();
-//                    Log.i(TAG,"process_time: "+(process_time));
-//                    Log.i(TAG,"read and convert time: "+(process_time-beginTime));
                     float[] trackBBox = siamtrackerTrack(yuvBytes, image.getWidth(), image.getHeight());
                     Log.i(TAG, "onImageAvailable: origin track rect: " + trackBBox[0] + " " +
                             trackBBox[1] + " " + trackBBox[2] + " " + trackBBox[3]);
@@ -665,4 +640,5 @@ public class MainActivity extends AppCompatActivity {
     public native void siamtrackerInit(byte[] yuv_bytes, int width, int height, float[] bbox);
 
     public native float[] siamtrackerTrack(byte[] yuv_bytes, int width, int height);
+
 }

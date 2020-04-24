@@ -55,14 +55,6 @@ set_target_properties(
         ${LIB_DIR}/libopencv_java4.so
 )
 
-
-#add_library(OpenCL SHARED IMPORTED)
-#set_target_properties(
-#        OpenCL
-#        PROPERTIES IMPORTED_LOCATION
-#        ${LIB_DIR}/libOpenCL.so
-#)
-
 file(GLOB SOURCE ${CMAKE_SOURCE_DIR}/*.cpp ${CMAKE_SOURCE_DIR}/*.h)
 add_library( # Sets the name of the library.
         siamtracker

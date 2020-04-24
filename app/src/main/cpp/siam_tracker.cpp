@@ -1,4 +1,4 @@
-#include "siamrpn.h"
+#include "siam_tracker.h"
 #include "include/opencv2/core/hal/interface.h"
 #include "include/MNN/Interpreter.hpp"
 #include "include/MNN/MNNForwardType.h"
@@ -11,7 +11,7 @@
 #define TAG "cpp log"
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO,TAG,__VA_ARGS__)
 
-SiamRPN_MNN::SiamRPN_MNN(std::string modelPath, std::string model_type) {
+SiamTracker::SiamTracker(std::string model_path, std::string model_type) {
     if (model_type == "mobi") {
         cfg = mobi_cfg;
     } else if (model_type == "mobi_pruning") {
@@ -29,16 +29,18 @@ SiamRPN_MNN::SiamRPN_MNN(std::string modelPath, std::string model_type) {
     window_ = outer(h, h);
     all_anchors_ = anchor_generator_->generate_all_anchors(int(cfg.INSTANCE_SIZE / 2), score_size_);
     //examplar
-    std::string examplar_path = modelPath + cfg.EXAMPLAR_MODEL_NAME;
-    exam_interp_ = MNN::Interpreter::createFromFile(examplar_path.c_str());
+    std::string examplar_path = model_path + cfg.EXAMPLAR_MODEL_NAME;
+    examplar_interp_ = std::shared_ptr<MNN::Interpreter>(MNN::Interpreter::createFromFile(examplar_path.c_str()));
     MNN::ScheduleConfig sched_cfg;
-    // the time use precision low has no affect
-//    sched_cfg.backendConfig->precision = MNN::BackendConfig::Precision_Low;
-    exam_sess_ = exam_interp_->createSession(sched_cfg);
-    exam_input_ = exam_interp_->getSessionInput(exam_sess_, nullptr);
+//     the time use precision low has no affect
+//    MNN::BackendConfig backendConfig;
+//    backendConfig.precision=MNN::BackendConfig::Precision_Low;
+//    sched_cfg.backendConfig=&backendConfig;
+    examplar_sess_ = examplar_interp_->createSession(sched_cfg);
+    examplar_input_ = examplar_interp_->getSessionInput(examplar_sess_, nullptr);
     //search
-    std::string search_path = modelPath + cfg.SEARCH_MODEL_NAME;
-    search_interp_ = MNN::Interpreter::createFromFile(search_path.c_str());
+    std::string search_path = model_path + cfg.SEARCH_MODEL_NAME;
+    search_interp_ = std::shared_ptr<MNN::Interpreter>(MNN::Interpreter::createFromFile(search_path.c_str()));
     search_sess_ = search_interp_->createSession(sched_cfg);
     if (model_type == "alex") {
         search_input_.push_back(search_interp_->getSessionInput(search_sess_, "e0"));
@@ -50,13 +52,13 @@ SiamRPN_MNN::SiamRPN_MNN(std::string modelPath, std::string model_type) {
     search_input_.push_back(search_interp_->getSessionInput(search_sess_, "search"));
     // examplar host tensor
     if (model_type == "alex") {
-        exam_out_hosts_.resize(1); //the alexnet backbone only contains one outputs
+        examplar_output_hosts_.resize(1); //the alexnet backbone only contains one outputs
     } else {
-        exam_out_hosts_.resize(3);
+        examplar_output_hosts_.resize(3);
     }
 }
 
-void SiamRPN_MNN::init(cv::Mat &img, Rect bbox) {
+void SiamTracker::init(cv::Mat &img, Rect bbox) {
     std::vector<float> bbox_pos{bbox.cx, bbox.cy};
     std::vector<float> bbox_size{bbox.w, bbox.h};
     float sz = size_z(bbox_size);
@@ -65,53 +67,58 @@ void SiamRPN_MNN::init(cv::Mat &img, Rect bbox) {
     //cv::Mat examplar_8u = cv::imread("E:\\BIP LAB\\siamtracker\\dataset\\examplar.png");
     examplar.convertTo(examplar, CV_32FC3);
     //wrap for input tensor
-    MNN::Tensor *nhwc_tensor = MNN::Tensor::create<float>(
-            std::vector<int>{1, cfg.EXAMPLAR_SIZE, cfg.EXAMPLAR_SIZE, 3}, nullptr, MNN::Tensor::TENSORFLOW);
-    float *nhwc_data = nhwc_tensor->host<float>();
-    size_t nhwc_size = nhwc_tensor->size();
-    std::memcpy(nhwc_data, examplar.data, nhwc_size);
-    exam_input_->copyFromHostTensor(nhwc_tensor);
-    exam_interp_->runSession(exam_sess_);
-    for (int i = 0; i < exam_out_hosts_.size(); i++) {
+    std::shared_ptr<MNN::Tensor> examplar_host(
+            MNN::Tensor::create<float>({1, cfg.EXAMPLAR_SIZE, cfg.EXAMPLAR_SIZE, 3},
+                                       nullptr,
+                                       MNN::Tensor::TENSORFLOW));
+    float *examplar_data = examplar_host->host<float>();
+    std::memcpy(examplar_data, examplar.data, examplar_host->size());
+    examplar_input_->copyFromHostTensor(examplar_host.get());
+    examplar_interp_->runSession(examplar_sess_);
+    for (int i = 0; i < examplar_output_hosts_.size(); i++) {
         std::string out_name = "e" + std::to_string(i);
-        MNN::Tensor *exam_output = exam_interp_->getSessionOutput(exam_sess_, out_name.c_str());
-        exam_out_hosts_[i] = MNN::Tensor::create<float>(std::vector<int>{1, cfg.OUT_CHANNELS, 7, 7}, nullptr,
-                                                        MNN::Tensor::CAFFE);
-        exam_output->copyToHostTensor(exam_out_hosts_[i]);
-        search_input_[i]->copyFromHostTensor(exam_out_hosts_[i]);
+        MNN::Tensor *examplar_output = examplar_interp_->getSessionOutput(examplar_sess_, out_name.c_str());
+        examplar_output_hosts_[i] = MNN::Tensor::create<float>({1, cfg.OUT_CHANNELS, 7, 7},
+                                                               nullptr,
+                                                               MNN::Tensor::CAFFE);
+        examplar_output->copyToHostTensor(examplar_output_hosts_[i]);
+        search_input_[i]->copyFromHostTensor(examplar_output_hosts_[i]);
     }
     bbox_pos_ = bbox_pos;
     bbox_size_ = bbox_size;
 }
 
-Rect SiamRPN_MNN::track(cv::Mat &img) {
+Rect SiamTracker::track(cv::Mat &img) {
     float sz = size_z(bbox_size_);
     float scale_z = cfg.EXAMPLAR_SIZE / float(sz);
     float sx = size_x(bbox_size_);
     cv::Mat search = get_subwindows(img, bbox_pos_, cfg.INSTANCE_SIZE, round(sx), channel_average_);
     search.convertTo(search, CV_32FC3);
-    MNN::Tensor *nhwc_tensor = MNN::Tensor::create<float>(
-            std::vector<int>{1, cfg.INSTANCE_SIZE, cfg.INSTANCE_SIZE, 3}, nullptr, MNN::Tensor::TENSORFLOW);
-    float *nhwc_data = nhwc_tensor->host<float>();
-    size_t nhwc_size = nhwc_tensor->size();
-    std::memcpy(nhwc_data, search.data, nhwc_size);
+
+    std::shared_ptr<MNN::Tensor> search_host(
+            MNN::Tensor::create<float>({1, cfg.INSTANCE_SIZE, cfg.INSTANCE_SIZE, 3}, nullptr,
+                                       MNN::Tensor::TENSORFLOW));
+    float *search_data = search_host->host<float>();
+    std::memcpy(search_data, search.data, search_host->size());
+
     //NOTE: the e0-2 need to be copied because the MNN will change the input when running, will cost some time.
-    for (int i = 0; i < exam_out_hosts_.size(); i++) {
-        search_input_[i]->copyFromHostTensor(exam_out_hosts_[i]);
+    for (int i = 0; i < examplar_output_hosts_.size(); i++) {
+        search_input_[i]->copyFromHostTensor(examplar_output_hosts_[i]);
     }
-    search_input_[3]->copyFromHostTensor(nhwc_tensor);
+    search_input_[3]->copyFromHostTensor(search_host.get());
 
     search_interp_->runSession(search_sess_);
+
     MNN::Tensor *cls = search_interp_->getSessionOutput(search_sess_, "cls");
     MNN::Tensor *loc = search_interp_->getSessionOutput(search_sess_, "loc");
-    MNN::Tensor *cls_host = new MNN::Tensor(cls, MNN::Tensor::CAFFE);
-    MNN::Tensor *loc_host = new MNN::Tensor(loc, MNN::Tensor::CAFFE);
-    cls->copyToHostTensor(cls_host);
-    loc->copyToHostTensor(loc_host);
-    //search_input_[0]->print();
-    //cls->print();
-    float *cls_ptr = cls_host->host<float>();
-    float *loc_ptr = loc_host->host<float>();
+
+    std::shared_ptr<MNN::Tensor> cls_host = std::make_shared<MNN::Tensor>(cls, MNN::Tensor::CAFFE);
+    std::shared_ptr<MNN::Tensor> loc_host = std::make_shared<MNN::Tensor>(loc, MNN::Tensor::CAFFE);
+    cls->copyToHostTensor(cls_host.get());
+    loc->copyToHostTensor(loc_host.get());
+
+    float *cls_data = cls_host->host<float>();
+    float *loc_data = loc_host->host<float>();
     int pred_size = score_size_ * score_size_ * cfg.ANCHOR_NUM;
     std::vector<float> score(pred_size);
     std::vector<float> pscore(pred_size);
@@ -119,16 +126,16 @@ Rect SiamRPN_MNN::track(cv::Mat &img) {
     std::vector<float> penalty(pred_size);
 
     for (int i = 0; i < pred_size; i++) {
-        score[i] = exp(cls_ptr[pred_size + i]) / (exp(cls_ptr[i]) + exp(cls_ptr[pred_size + i]));
+        score[i] = exp(cls_data[pred_size + i]) / (exp(cls_data[i]) + exp(cls_data[pred_size + i]));
         float src_width = all_anchors_[i].x2 - all_anchors_[i].x1;
         float src_height = all_anchors_[i].y2 - all_anchors_[i].y1;
         float src_ctr_x = all_anchors_[i].x1 + 0.5f * src_width;
         float src_ctr_y = all_anchors_[i].y1 + 0.5f * src_height;
 
-        pred_bbox[i].cx = loc_ptr[i] * src_width + src_ctr_x;
-        pred_bbox[i].cy = loc_ptr[pred_size + i] * src_height + src_ctr_y;
-        pred_bbox[i].w = src_width * exp(loc_ptr[2 * pred_size + i]);
-        pred_bbox[i].h = src_height * exp(loc_ptr[3 * pred_size + i]);
+        pred_bbox[i].cx = loc_data[i] * src_width + src_ctr_x;
+        pred_bbox[i].cy = loc_data[pred_size + i] * src_height + src_ctr_y;
+        pred_bbox[i].w = src_width * exp(loc_data[2 * pred_size + i]);
+        pred_bbox[i].h = src_height * exp(loc_data[3 * pred_size + i]);
         // penalty
         float r = (bbox_size_[0] / bbox_size_[1]) / (pred_bbox[i].w / pred_bbox[i].h);
         float rc = fmax(r, 1.f / r);
@@ -169,7 +176,7 @@ Rect SiamRPN_MNN::track(cv::Mat &img) {
     return best_bbox;
 }
 
-float SiamRPN_MNN::size_z(std::vector<float> &bbox_size) {
+float SiamTracker::size_z(std::vector<float> &bbox_size) {
     float context_amount = 0.5;
     float wz = bbox_size[0] + context_amount * (bbox_size[0] + bbox_size[1]);
     float hz = bbox_size[1] + context_amount * (bbox_size[0] + bbox_size[1]);
@@ -177,7 +184,7 @@ float SiamRPN_MNN::size_z(std::vector<float> &bbox_size) {
     return size_z;
 }
 
-float SiamRPN_MNN::size_x(std::vector<float> &bbox_size) {
+float SiamTracker::size_x(std::vector<float> &bbox_size) {
     float context_amount = 0.5;
     float wz = bbox_size[0] + context_amount * (bbox_size[0] + bbox_size[1]);
     float hz = bbox_size[1] + context_amount * (bbox_size[0] + bbox_size[1]);
@@ -190,7 +197,7 @@ float SiamRPN_MNN::size_x(std::vector<float> &bbox_size) {
 }
 
 cv::Mat
-SiamRPN_MNN::get_subwindows(cv::Mat &img, std::vector<float> &pos, int dst_size, int ori_size, cv::Scalar padding) {
+SiamTracker::get_subwindows(cv::Mat &img, std::vector<float> &pos, int dst_size, int ori_size, cv::Scalar padding) {
     //TODO: the speed of the func maybe slow because of warpAffine
     float scale = float(dst_size) / float(ori_size);
     float shift_x = -floor(pos[0] - (ori_size + 1) / 2.f + 0.5);
@@ -207,7 +214,7 @@ SiamRPN_MNN::get_subwindows(cv::Mat &img, std::vector<float> &pos, int dst_size,
     return new_patch;
 }
 
-std::vector<float> SiamRPN_MNN::hanning(int n) {
+std::vector<float> SiamTracker::hanning(int n) {
     std::vector<float> window(n);
     for (int i = 0; i < n; i++) {
         window[i] = 0.5 - 0.5 * cos(2 * PI * i / (n - 1));
@@ -215,7 +222,7 @@ std::vector<float> SiamRPN_MNN::hanning(int n) {
     return window;
 }
 
-std::vector<float> SiamRPN_MNN::outer(std::vector<float> &vec1, std::vector<float> &vec2) {
+std::vector<float> SiamTracker::outer(std::vector<float> &vec1, std::vector<float> &vec2) {
     std::vector<float> window(vec1.size() * vec2.size());
     for (int i = 0; i < vec1.size(); i++) {
         for (int j = 0; j < vec2.size(); j++) {

@@ -6,9 +6,9 @@
 #include <opencv2/opencv.hpp>
 #include "anchor.h"
 #include "config.h"
-class SiamRPN_MNN{
+class SiamTracker{
 public:
-    SiamRPN_MNN(std::string modelPath,std::string model_type);
+    SiamTracker(std::string model_path, std::string model_type);
     void init(cv::Mat& img, Rect bbox);
     Rect track(cv::Mat& img);
 
@@ -21,11 +21,11 @@ private:
     std::vector<float> bbox_size_;
     std::vector<float> window_;
     //examplar session
-    MNN::Interpreter* exam_interp_;
-    MNN::Session* exam_sess_;
-    MNN::Tensor* exam_input_;
+    std::shared_ptr<MNN::Interpreter> examplar_interp_;
+    MNN::Session* examplar_sess_;
+    MNN::Tensor* examplar_input_;
     //search session
-    MNN::Interpreter* search_interp_;
+    std::shared_ptr<MNN::Interpreter> search_interp_;
     MNN::Session* search_sess_;
     std::vector<MNN::Tensor*> search_input_;
     //util functions
@@ -36,7 +36,7 @@ private:
     std::vector<float> hanning(int n);
     std::vector<float> outer(std::vector<float>& vec1, std::vector<float>& vec2);
     // tensor host for examplar output
-    std::vector<MNN::Tensor*> exam_out_hosts_;
+    std::vector<MNN::Tensor*> examplar_output_hosts_;
 
 };
 
