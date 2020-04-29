@@ -89,6 +89,7 @@ void SiamTracker::init(cv::Mat &img, Rect bbox) {
 }
 
 Rect SiamTracker::track(cv::Mat &img) {
+    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
     float sz = size_z(bbox_size_);
     float scale_z = cfg.EXAMPLAR_SIZE / float(sz);
     float sx = size_x(bbox_size_);
@@ -106,8 +107,19 @@ Rect SiamTracker::track(cv::Mat &img) {
         search_input_[i]->copyFromHostTensor(examplar_output_hosts_[i]);
     }
     search_input_[3]->copyFromHostTensor(search_host.get());
+    std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
+    std::chrono::duration<double> time_span = std::chrono::duration_cast<std::chrono::duration<double>>(now - begin);
+    float span_time = static_cast<float>(time_span.count());
+    LOGI("cpp track convert time: %f", span_time);
+
+    begin = std::chrono::steady_clock::now();
 
     search_interp_->runSession(search_sess_);
+
+    now = std::chrono::steady_clock::now();
+    time_span = std::chrono::duration_cast<std::chrono::duration<double>>(now - begin);
+    span_time = static_cast<float>(time_span.count());
+    LOGI("cpp track run session time: %f", span_time);
 
     MNN::Tensor *cls = search_interp_->getSessionOutput(search_sess_, "cls");
     MNN::Tensor *loc = search_interp_->getSessionOutput(search_sess_, "loc");
@@ -231,6 +243,7 @@ std::vector<float> SiamTracker::outer(std::vector<float> &vec1, std::vector<floa
     }
     return window;
 }
+
 
 
 

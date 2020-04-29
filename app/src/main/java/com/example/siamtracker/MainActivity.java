@@ -104,8 +104,6 @@ public class MainActivity extends AppCompatActivity {
     //
     private Spinner mSpinner;
 
-    private boolean mSwitchModel = false;
-
     String[] mModelTypes = {"mobi", "mobi_pruning", "alex"};
     String mModelType;
 
@@ -204,10 +202,10 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
         // model init
-        File sdDir = Environment.getExternalStorageDirectory();//获取跟目录
-        String sdPath = sdDir.toString() + "/siamtracker/";
-        String modelType = "mobi";
-        siamtrackerInitModel(sdPath, modelType);
+//        File sdDir = Environment.getExternalStorageDirectory();//获取跟目录
+//        String sdPath = sdDir.toString() + "/siamtracker/";
+//        String modelType = "mobi";
+//        siamtrackerInitModel(sdPath, modelType);
         mTextureView = findViewById(R.id.textureView);
         mTextureView.setSurfaceTextureListener(mTextureListener);
         startBackgroundThread();
@@ -237,12 +235,18 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
                 mModelType = mModelTypes[pos];
-                mSwitchModel = true;
+                siamtrackerReleaseModel();
+                File sdDir = Environment.getExternalStorageDirectory();//获取根目录
+                String sdPath = sdDir.toString() + "/siamtracker/";
+                siamtrackerInitModel(sdPath, mModelType);
+                clearDraw();
+                mStartInit = false;
+                mStartTrack = false;
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-                mSwitchModel = false;
+
             }
         });
     }
@@ -377,34 +381,25 @@ public class MainActivity extends AppCompatActivity {
                     return;
                 }
                 PREVIEW_RETURN_IMAGE_COUNT = 0;
-                if (mSwitchModel) {
-                    File sdDir = Environment.getExternalStorageDirectory();//获取根目录
-                    String sdPath = sdDir.toString() + "/siamtracker/";
-//                    siamtrackerInitModel(sdPath, mModelType);
-                    clearDraw();
-                    mSwitchModel = false;
-                    mStartInit = false;
-                    mStartTrack = false;
-                }
                 if (mStartInit) {
                     //get byte data
                     byte[] yuvBytes = yuv2byte(image);
-                    Log.i(TAG, "onImageAvailable: origin init rect " + mInitRect.left + " " +
-                            mInitRect.top + " " + mInitRect.right + " " + mInitRect.bottom);
+//                    Log.i(TAG, "onImageAvailable: origin init rect " + mInitRect.left + " " +
+//                            mInitRect.top + " " + mInitRect.right + " " + mInitRect.bottom);
                     float[] initBbox = getInitBBox(mInitRect);
-                    Log.i(TAG, "onImageAvailable: changed init rect" + initBbox[0] + " " +
-                            initBbox[1] + " " + initBbox[2] + " " + initBbox[3]);
+//                    Log.i(TAG, "onImageAvailable: changed init rect" + initBbox[0] + " " +
+//                            initBbox[1] + " " + initBbox[2] + " " + initBbox[3]);
                     siamtrackerInit(yuvBytes, image.getWidth(), image.getHeight(), initBbox);
                     mStartTrack = true;
                     mStartInit = false;
                 } else if (mStartTrack) {
                     byte[] yuvBytes = yuv2byte(image);
                     float[] trackBBox = siamtrackerTrack(yuvBytes, image.getWidth(), image.getHeight());
-                    Log.i(TAG, "onImageAvailable: origin track rect: " + trackBBox[0] + " " +
-                            trackBBox[1] + " " + trackBBox[2] + " " + trackBBox[3]);
+//                    Log.i(TAG, "onImageAvailable: origin track rect: " + trackBBox[0] + " " +
+//                            trackBBox[1] + " " + trackBBox[2] + " " + trackBBox[3]);
                     mTrackRect = getTrackBBox(trackBBox);
-                    Log.i(TAG, "onImageAvailable: changed track rect: " + mTrackRect.left + " " +
-                            mTrackRect.top + " " + mTrackRect.right + " " + mTrackRect.bottom);
+//                    Log.i(TAG, "onImageAvailable: changed track rect: " + mTrackRect.left + " " +
+//                            mTrackRect.top + " " + mTrackRect.right + " " + mTrackRect.bottom);
                     clearDraw();
                     mCanvas = mSurfaceHolder.lockCanvas();   // 得到surfaceView的画布
                     mCanvas.drawRect(mTrackRect, mPaint);
@@ -636,6 +631,8 @@ public class MainActivity extends AppCompatActivity {
      * which is packaged with this application.
      */
     public native void siamtrackerInitModel(String path, String model_type);
+
+    public native void siamtrackerReleaseModel();
 
     public native void siamtrackerInit(byte[] yuv_bytes, int width, int height, float[] bbox);
 

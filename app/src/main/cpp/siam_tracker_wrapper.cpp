@@ -16,10 +16,17 @@ Java_com_example_siamtracker_MainActivity_siamtrackerInitModel(
         jstring model_type_
 ) {
     const char *modelPath = env->GetStringUTFChars(path, 0);
-    const char *modelType=env->GetStringUTFChars(model_type_,0);
+    const char *modelType = env->GetStringUTFChars(model_type_, 0);
     tracker = new SiamTracker(modelPath, modelType);
 }
 
+extern "C" JNIEXPORT void JNICALL
+Java_com_example_siamtracker_MainActivity_siamtrackerReleaseModel(
+        JNIEnv *env,
+        jobject obj
+) {
+    delete tracker;
+}
 extern "C" JNIEXPORT void JNICALL
 Java_com_example_siamtracker_MainActivity_siamtrackerInit(
         JNIEnv *env,
