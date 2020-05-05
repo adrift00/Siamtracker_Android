@@ -37,7 +37,6 @@ private:
     std::vector<float> outer(std::vector<float>& vec1, std::vector<float>& vec2);
     // tensor host for examplar output
     std::vector<MNN::Tensor*> examplar_output_hosts_;
-
 };
 
 

@@ -42,16 +42,28 @@ Java_com_example_siamtracker_MainActivity_siamtrackerInit(
     ::memcpy(yuv_img.data, yuv_ptr, (size_t) (width * height * 1.5));
     cv::Mat init_img(height, width, CV_8UC3);
     cv::cvtColor(yuv_img, init_img, CV_YUV2BGR_NV12);
+//    debug
+//    init_img=cv::imread("/storage/emulated/0/siamtracker/00000001.jpg");
+//    cv::imwrite("/storage/emulated/0/examplar.jpg", init_img);
+//    debug
     Rect init_bbox;
     float *bbox = env->GetFloatArrayElements(bbox_, 0);
     init_bbox.cx = bbox[0];
     init_bbox.cy = bbox[1];
     init_bbox.w = bbox[2];
     init_bbox.h = bbox[3];
-    //debug
+//    debug
+//    init_bbox.cx = 301.575;
+//    init_bbox.cy = 221.18;
+//    init_bbox.w = 117.44;
+//    init_bbox.h = 112.53;
+//    debug
     tracker->init(init_img, init_bbox);
     cv::Rect rect(int(bbox[0] - bbox[2] / 2.f), int(bbox[1] - bbox[3] / 2), int(bbox[2]), int(bbox[3]));
-    cv::rectangle(init_img, rect, cv::Scalar(0, 0, 255), 1, cv::LINE_8, 0);
+//    debug
+//    cv::rectangle(init_img, rect, cv::Scalar(0, 0, 255), 1, cv::LINE_8, 0);
+//    cv::imwrite("/storage/emulated/0/examplar_line.jpg", init_img);
+//    debug
     std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
     std::chrono::duration<double> time_span = std::chrono::duration_cast<std::chrono::duration<double>>(now - begin);
     float span_time = static_cast<float>(time_span.count());
@@ -72,8 +84,8 @@ Java_com_example_siamtracker_MainActivity_siamtrackerTrack(
     ::memcpy(yuv_img.data, yuv_ptr, (size_t) (width * height * 1.5));
     cv::Mat search_img(height, width, CV_8UC3);
     cv::cvtColor(yuv_img, search_img, CV_YUV2BGR_NV12);
+//    search_img=cv::imread("/storage/emulated/0/siamtracker/00000002.jpg");
 //    cv::imwrite("/storage/emulated/0/search.jpg", search_img);
-//    search_img=cv::imread("/storage/emulated/0/siamtracker/00000006.jpg");
     Rect bbox = tracker->track(search_img);
     float bbox_ptr[4] = {bbox.cx, bbox.cy, bbox.w, bbox.h};
     jfloatArray rect = env->NewFloatArray(4);

@@ -21,9 +21,10 @@ SiamTracker::SiamTracker(std::string model_path, std::string model_type) {
     } else {
         LOGI("model type invalid!");
     }
-    anchor_generator_ = std::make_shared<AnchorGenerator>(std::vector<float>{8},
-                                                          std::vector<float>{0.33, 0.5, 1, 2, 3},
-                                                          8);
+    anchor_generator_ = std::make_shared<AnchorGenerator>(cfg.SCALES,
+                                                          cfg.RATIOS,
+                                                          cfg.STRIDE,
+                                                          cfg.BASE_SIZE);
     score_size_ = int((cfg.INSTANCE_SIZE - cfg.EXAMPLAR_SIZE) / cfg.STRIDE) + 1 + cfg.BASE_SIZE;
     std::vector<float> h = hanning(score_size_);
     window_ = outer(h, h);
@@ -32,7 +33,7 @@ SiamTracker::SiamTracker(std::string model_path, std::string model_type) {
     std::string examplar_path = model_path + cfg.EXAMPLAR_MODEL_NAME;
     examplar_interp_ = std::shared_ptr<MNN::Interpreter>(MNN::Interpreter::createFromFile(examplar_path.c_str()));
     MNN::ScheduleConfig sched_cfg;
-//     the time use precision low has no affect
+//    the time use precision low has no affect
 //    MNN::BackendConfig backendConfig;
 //    backendConfig.precision=MNN::BackendConfig::Precision_Low;
 //    sched_cfg.backendConfig=&backendConfig;
@@ -44,10 +45,18 @@ SiamTracker::SiamTracker(std::string model_path, std::string model_type) {
     search_sess_ = search_interp_->createSession(sched_cfg);
     if (model_type == "alex") {
         search_input_.push_back(search_interp_->getSessionInput(search_sess_, "e0"));
+        // the MNN will add the input, if not add this, the result fo these branch will be wrong.
+        search_input_.push_back(search_interp_->getSessionInput(search_sess_, "71"));
     } else {
         search_input_.push_back(search_interp_->getSessionInput(search_sess_, "e0"));
         search_input_.push_back(search_interp_->getSessionInput(search_sess_, "e1"));
         search_input_.push_back(search_interp_->getSessionInput(search_sess_, "e2"));
+//        if (model_type == "mobi_pruning") {
+//            search_input_.push_back(search_interp_->getSessionInput(search_sess_, "246"));
+//            search_input_.push_back(search_interp_->getSessionInput(search_sess_, "303"));
+//            search_input_.push_back(search_interp_->getSessionInput(search_sess_, "361"));
+//
+//        }
     }
     search_input_.push_back(search_interp_->getSessionInput(search_sess_, "search"));
     // examplar host tensor
@@ -64,7 +73,6 @@ void SiamTracker::init(cv::Mat &img, Rect bbox) {
     float sz = size_z(bbox_size);
     channel_average_ = cv::mean(img);
     cv::Mat examplar = get_subwindows(img, bbox_pos, cfg.EXAMPLAR_SIZE, round(sz), channel_average_);
-    //cv::Mat examplar_8u = cv::imread("E:\\BIP LAB\\siamtracker\\dataset\\examplar.png");
     examplar.convertTo(examplar, CV_32FC3);
     //wrap for input tensor
     std::shared_ptr<MNN::Tensor> examplar_host(
@@ -78,12 +86,27 @@ void SiamTracker::init(cv::Mat &img, Rect bbox) {
     for (int i = 0; i < examplar_output_hosts_.size(); i++) {
         std::string out_name = "e" + std::to_string(i);
         MNN::Tensor *examplar_output = examplar_interp_->getSessionOutput(examplar_sess_, out_name.c_str());
-        examplar_output_hosts_[i] = MNN::Tensor::create<float>({1, cfg.OUT_CHANNELS, 7, 7},
+        std::vector<int> output_size;
+        if (cfg.MODEL_TYPE == "alex") {
+            output_size = {1, cfg.OUT_CHANNELS, 6, 6};
+        } else {
+            output_size = {1, cfg.OUT_CHANNELS, 7, 7};
+        }
+        examplar_output_hosts_[i] = MNN::Tensor::create<float>(output_size,
                                                                nullptr,
                                                                MNN::Tensor::CAFFE);
         examplar_output->copyToHostTensor(examplar_output_hosts_[i]);
         search_input_[i]->copyFromHostTensor(examplar_output_hosts_[i]);
     }
+    // the workaround for the mnn added input
+    if (cfg.MODEL_TYPE == "alex") {
+        search_input_[1]->copyFromHostTensor(examplar_output_hosts_[0]);
+    }
+//    if (cfg.MODEL_TYPE == "mobi_pruning") {
+//        search_input_[3]->copyFromHostTensor(examplar_output_hosts_[0]);
+//        search_input_[4]->copyFromHostTensor(examplar_output_hosts_[1]);
+//        search_input_[5]->copyFromHostTensor(examplar_output_hosts_[2]);
+//    }
     bbox_pos_ = bbox_pos;
     bbox_size_ = bbox_size;
 }
@@ -106,7 +129,16 @@ Rect SiamTracker::track(cv::Mat &img) {
     for (int i = 0; i < examplar_output_hosts_.size(); i++) {
         search_input_[i]->copyFromHostTensor(examplar_output_hosts_[i]);
     }
-    search_input_[3]->copyFromHostTensor(search_host.get());
+    // the workaround for the mnn added input
+    if (cfg.MODEL_TYPE == "alex") {
+        search_input_[1]->copyFromHostTensor(examplar_output_hosts_[0]);
+    }
+//    if (cfg.MODEL_TYPE == "mobi_pruning") {
+//        search_input_[3]->copyFromHostTensor(examplar_output_hosts_[0]);
+//        search_input_[4]->copyFromHostTensor(examplar_output_hosts_[1]);
+//        search_input_[5]->copyFromHostTensor(examplar_output_hosts_[2]);
+//    }
+    search_input_[search_input_.size() - 1]->copyFromHostTensor(search_host.get());
     std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
     std::chrono::duration<double> time_span = std::chrono::duration_cast<std::chrono::duration<double>>(now - begin);
     float span_time = static_cast<float>(time_span.count());
@@ -131,6 +163,20 @@ Rect SiamTracker::track(cv::Mat &img) {
 
     float *cls_data = cls_host->host<float>();
     float *loc_data = loc_host->host<float>();
+//    debug
+//    MNN::Tensor *save_tensor = search_interp_->getSessionOutput(search_sess_, "189");
+//
+//    std::shared_ptr<MNN::Tensor> save_host = std::make_shared<MNN::Tensor>(save_tensor, MNN::Tensor::CAFFE);
+//    save_tensor->copyToHostTensor(save_host.get());
+//
+//    float *save_data = save_host->host<float>();
+//    MNN::Tensor *save_tensor = search_interp_->getSessionOutput(search_sess_, "71");
+//
+//    std::shared_ptr<MNN::Tensor> save_host = std::make_shared<MNN::Tensor>(cls, MNN::Tensor::CAFFE);
+//    save_tensor->copyToHostTensor(save_host.get());
+//
+//    float *save_data = save_host->host<float>();
+//    debug
     int pred_size = score_size_ * score_size_ * cfg.ANCHOR_NUM;
     std::vector<float> score(pred_size);
     std::vector<float> pscore(pred_size);

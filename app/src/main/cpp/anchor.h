@@ -30,11 +30,11 @@ private:
 
 
 public:
-    AnchorGenerator(std::vector<float> scales, std::vector<float> ratios, int stride) :
+    AnchorGenerator(std::vector<float> scales, std::vector<float> ratios, int stride, int base_size) :
             scales_(scales),
             ratios_(ratios),
             stride_(stride),
-            base_size_(stride),
+            base_size_(base_size),
             anchor_num_(scales.size()*ratios.size())
     {}
     std::vector<BBox> generate_all_anchors(int img_c, int out_size);

@@ -192,12 +192,17 @@ public class MainActivity extends AppCompatActivity {
         verifyStoragePermissions(this);
         //copy to sd scard
         try {
+            // alex model
+            copyBigDataToSD("siamrpn_alex_examplar.mnn");
+            copyBigDataToSD("siamrpn_alex_search.mnn");
             // the origin mobilenetv2 model
             copyBigDataToSD("siamrpn_mobi_examplar.mnn");
             copyBigDataToSD("siamrpn_mobi_search.mnn");
             // the pruning mobilenetv2 model
             copyBigDataToSD("siamrpn_mobi_pruning_examplar.mnn");
             copyBigDataToSD("siamrpn_mobi_pruning_search.mnn");
+//            copyBigDataToSD("00000001.jpg");
+//            copyBigDataToSD("00000002.jpg");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -384,22 +389,22 @@ public class MainActivity extends AppCompatActivity {
                 if (mStartInit) {
                     //get byte data
                     byte[] yuvBytes = yuv2byte(image);
-//                    Log.i(TAG, "onImageAvailable: origin init rect " + mInitRect.left + " " +
-//                            mInitRect.top + " " + mInitRect.right + " " + mInitRect.bottom);
+                    Log.i(TAG, "onImageAvailable: origin init rect " + mInitRect.left + " " +
+                            mInitRect.top + " " + mInitRect.right + " " + mInitRect.bottom);
                     float[] initBbox = getInitBBox(mInitRect);
-//                    Log.i(TAG, "onImageAvailable: changed init rect" + initBbox[0] + " " +
-//                            initBbox[1] + " " + initBbox[2] + " " + initBbox[3]);
+                    Log.i(TAG, "onImageAvailable: changed init rect" + initBbox[0] + " " +
+                            initBbox[1] + " " + initBbox[2] + " " + initBbox[3]);
                     siamtrackerInit(yuvBytes, image.getWidth(), image.getHeight(), initBbox);
                     mStartTrack = true;
                     mStartInit = false;
                 } else if (mStartTrack) {
                     byte[] yuvBytes = yuv2byte(image);
                     float[] trackBBox = siamtrackerTrack(yuvBytes, image.getWidth(), image.getHeight());
-//                    Log.i(TAG, "onImageAvailable: origin track rect: " + trackBBox[0] + " " +
-//                            trackBBox[1] + " " + trackBBox[2] + " " + trackBBox[3]);
+                    Log.i(TAG, "onImageAvailable: origin track rect: " + trackBBox[0] + " " +
+                            trackBBox[1] + " " + trackBBox[2] + " " + trackBBox[3]);
                     mTrackRect = getTrackBBox(trackBBox);
-//                    Log.i(TAG, "onImageAvailable: changed track rect: " + mTrackRect.left + " " +
-//                            mTrackRect.top + " " + mTrackRect.right + " " + mTrackRect.bottom);
+                    Log.i(TAG, "onImageAvailable: changed track rect: " + mTrackRect.left + " " +
+                            mTrackRect.top + " " + mTrackRect.right + " " + mTrackRect.bottom);
                     clearDraw();
                     mCanvas = mSurfaceHolder.lockCanvas();   // 得到surfaceView的画布
                     mCanvas.drawRect(mTrackRect, mPaint);
