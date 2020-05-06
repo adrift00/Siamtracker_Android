@@ -84,8 +84,10 @@ Java_com_example_siamtracker_MainActivity_siamtrackerTrack(
     ::memcpy(yuv_img.data, yuv_ptr, (size_t) (width * height * 1.5));
     cv::Mat search_img(height, width, CV_8UC3);
     cv::cvtColor(yuv_img, search_img, CV_YUV2BGR_NV12);
+//debug
 //    search_img=cv::imread("/storage/emulated/0/siamtracker/00000002.jpg");
 //    cv::imwrite("/storage/emulated/0/search.jpg", search_img);
+//debug
     Rect bbox = tracker->track(search_img);
     float bbox_ptr[4] = {bbox.cx, bbox.cy, bbox.w, bbox.h};
     jfloatArray rect = env->NewFloatArray(4);

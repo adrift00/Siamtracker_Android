@@ -51,12 +51,12 @@ SiamTracker::SiamTracker(std::string model_path, std::string model_type) {
         search_input_.push_back(search_interp_->getSessionInput(search_sess_, "e0"));
         search_input_.push_back(search_interp_->getSessionInput(search_sess_, "e1"));
         search_input_.push_back(search_interp_->getSessionInput(search_sess_, "e2"));
-//        if (model_type == "mobi_pruning") {
-//            search_input_.push_back(search_interp_->getSessionInput(search_sess_, "246"));
-//            search_input_.push_back(search_interp_->getSessionInput(search_sess_, "303"));
-//            search_input_.push_back(search_interp_->getSessionInput(search_sess_, "361"));
-//
-//        }
+        if (model_type == "mobi_pruning") {
+            search_input_.push_back(search_interp_->getSessionInput(search_sess_, "246"));
+            search_input_.push_back(search_interp_->getSessionInput(search_sess_, "303"));
+            search_input_.push_back(search_interp_->getSessionInput(search_sess_, "361"));
+
+        }
     }
     search_input_.push_back(search_interp_->getSessionInput(search_sess_, "search"));
     // examplar host tensor
@@ -102,11 +102,11 @@ void SiamTracker::init(cv::Mat &img, Rect bbox) {
     if (cfg.MODEL_TYPE == "alex") {
         search_input_[1]->copyFromHostTensor(examplar_output_hosts_[0]);
     }
-//    if (cfg.MODEL_TYPE == "mobi_pruning") {
-//        search_input_[3]->copyFromHostTensor(examplar_output_hosts_[0]);
-//        search_input_[4]->copyFromHostTensor(examplar_output_hosts_[1]);
-//        search_input_[5]->copyFromHostTensor(examplar_output_hosts_[2]);
-//    }
+    if (cfg.MODEL_TYPE == "mobi_pruning") {
+        search_input_[3]->copyFromHostTensor(examplar_output_hosts_[0]);
+        search_input_[4]->copyFromHostTensor(examplar_output_hosts_[1]);
+        search_input_[5]->copyFromHostTensor(examplar_output_hosts_[2]);
+    }
     bbox_pos_ = bbox_pos;
     bbox_size_ = bbox_size;
 }
@@ -133,11 +133,11 @@ Rect SiamTracker::track(cv::Mat &img) {
     if (cfg.MODEL_TYPE == "alex") {
         search_input_[1]->copyFromHostTensor(examplar_output_hosts_[0]);
     }
-//    if (cfg.MODEL_TYPE == "mobi_pruning") {
-//        search_input_[3]->copyFromHostTensor(examplar_output_hosts_[0]);
-//        search_input_[4]->copyFromHostTensor(examplar_output_hosts_[1]);
-//        search_input_[5]->copyFromHostTensor(examplar_output_hosts_[2]);
-//    }
+    if (cfg.MODEL_TYPE == "mobi_pruning") {
+        search_input_[3]->copyFromHostTensor(examplar_output_hosts_[0]);
+        search_input_[4]->copyFromHostTensor(examplar_output_hosts_[1]);
+        search_input_[5]->copyFromHostTensor(examplar_output_hosts_[2]);
+    }
     search_input_[search_input_.size() - 1]->copyFromHostTensor(search_host.get());
     std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
     std::chrono::duration<double> time_span = std::chrono::duration_cast<std::chrono::duration<double>>(now - begin);
