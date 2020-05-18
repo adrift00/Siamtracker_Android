@@ -281,7 +281,9 @@ public class MainActivity extends AppCompatActivity {
             for (String cameraId : manager.getCameraIdList()) {
                 CameraCharacteristics characteristics = manager.getCameraCharacteristics(cameraId);
                 // 默认打开后置摄像头 - 忽略前置摄像头
-                if (characteristics.get(CameraCharacteristics.LENS_FACING) == CameraCharacteristics.LENS_FACING_FRONT)
+//                if (characteristics.get(CameraCharacteristics.LENS_FACING) == CameraCharacteristics.LENS_FACING_FRONT)
+//                    continue;
+                if (characteristics.get(CameraCharacteristics.LENS_FACING) == CameraCharacteristics.LENS_FACING_BACK)
                     continue;
                 // 获取StreamConfigurationMap，它是管理摄像头支持的所有输出格式和尺寸
                 StreamConfigurationMap map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
@@ -538,20 +540,28 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private float[] getInitBBox(Rect rect) {
-        float x1 = rect.top;
-        float y1 = 1080 - rect.right;
-        float x2 = rect.bottom;
-        float y2 = 1080 - rect.left;
+//        float x1 = rect.top;
+//        float y1 = 1080 - rect.right;
+//        float x2 = rect.bottom;
+//        float y2 = 1080 - rect.left;
+        float x1 = 1440-rect.bottom;
+        float y1 = rect.left;
+        float x2 = 1440-rect.top;
+        float y2 = rect.right;
         float[] ret = {(x1 + x2) / 2, (y1 + y2) / 2, (x2 - x1), (y2 - y1)};
         return ret;
     }
 
     private Rect getTrackBBox(float[] bbox) {
         Rect rect = new Rect(0, 0, 0, 0);
-        rect.top = (int) (bbox[0] - bbox[2] / 2);
-        rect.bottom = (int) (bbox[0] + bbox[2] / 2);
-        rect.left = (int) (1080 - bbox[1] - bbox[3] / 2);
-        rect.right = (int) (1080 - bbox[1] + bbox[3] / 2);
+//        rect.top = (int) (bbox[0] - bbox[2] / 2);
+//        rect.bottom = (int) (bbox[0] + bbox[2] / 2);
+//        rect.left = (int) (1080 - bbox[1] - bbox[3] / 2);
+//        rect.right = (int) (1080 - bbox[1] + bbox[3] / 2);
+        rect.top = (int) (1440-(bbox[0] + bbox[2] / 2));
+        rect.bottom = (int) (1440-(bbox[0] - bbox[2] / 2));
+        rect.left = (int) (bbox[1] - bbox[3] / 2);
+        rect.right = (int) (bbox[1] + bbox[3] / 2);
         return rect;
     }
 

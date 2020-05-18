@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Siamtracker</string>
+    <string name="textview_text">Please select the backbone type: </string>
 </resources>

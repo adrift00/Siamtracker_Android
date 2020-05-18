@@ -33,7 +33,7 @@ SiamTracker::SiamTracker(std::string model_path, std::string model_type) {
     std::string examplar_path = model_path + cfg.EXAMPLAR_MODEL_NAME;
     examplar_interp_ = std::shared_ptr<MNN::Interpreter>(MNN::Interpreter::createFromFile(examplar_path.c_str()));
     MNN::ScheduleConfig sched_cfg;
-//    the time use precision low has no affect
+//    the time use precision low has no affect, because my cpu is too old.
 //    MNN::BackendConfig backendConfig;
 //    backendConfig.precision=MNN::BackendConfig::Precision_Low;
 //    sched_cfg.backendConfig=&backendConfig;
@@ -74,6 +74,7 @@ void SiamTracker::init(cv::Mat &img, Rect bbox) {
     channel_average_ = cv::mean(img);
     cv::Mat examplar = get_subwindows(img, bbox_pos, cfg.EXAMPLAR_SIZE, round(sz), channel_average_);
     examplar.convertTo(examplar, CV_32FC3);
+//    cv::imwrite("/storage/emulated/0/examplar_patch.png",examplar);
     //wrap for input tensor
     std::shared_ptr<MNN::Tensor> examplar_host(
             MNN::Tensor::create<float>({1, cfg.EXAMPLAR_SIZE, cfg.EXAMPLAR_SIZE, 3},
@@ -118,6 +119,7 @@ Rect SiamTracker::track(cv::Mat &img) {
     float sx = size_x(bbox_size_);
     cv::Mat search = get_subwindows(img, bbox_pos_, cfg.INSTANCE_SIZE, round(sx), channel_average_);
     search.convertTo(search, CV_32FC3);
+//    cv::imwrite("/storage/emulated/0/search_patch.png",search);
 
     std::shared_ptr<MNN::Tensor> search_host(
             MNN::Tensor::create<float>({1, cfg.INSTANCE_SIZE, cfg.INSTANCE_SIZE, 3}, nullptr,

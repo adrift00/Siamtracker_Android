@@ -42,6 +42,8 @@ Java_com_example_siamtracker_MainActivity_siamtrackerInit(
     ::memcpy(yuv_img.data, yuv_ptr, (size_t) (width * height * 1.5));
     cv::Mat init_img(height, width, CV_8UC3);
     cv::cvtColor(yuv_img, init_img, CV_YUV2BGR_NV12);
+    // for front camera
+    cv::flip(init_img,init_img,0);
 //    debug
 //    init_img=cv::imread("/storage/emulated/0/siamtracker/00000001.jpg");
 //    cv::imwrite("/storage/emulated/0/examplar.jpg", init_img);
@@ -84,6 +86,7 @@ Java_com_example_siamtracker_MainActivity_siamtrackerTrack(
     ::memcpy(yuv_img.data, yuv_ptr, (size_t) (width * height * 1.5));
     cv::Mat search_img(height, width, CV_8UC3);
     cv::cvtColor(yuv_img, search_img, CV_YUV2BGR_NV12);
+    cv::flip(search_img,search_img,0);
 //debug
 //    search_img=cv::imread("/storage/emulated/0/siamtracker/00000002.jpg");
 //    cv::imwrite("/storage/emulated/0/search.jpg", search_img);
